@@ -1,0 +1,7 @@
+@font-face {
+  font-family: "OpenSans";
+  src: url("../fonts/OpenSans-VariableFont_wdth\,wght.ttf") format("ttf"),
+    url("../fonts/OpenSans-Italic-VariableFont_wdth\,wght.ttf") format("ttf");
+  font-weight: 400;
+  font-style: normal;
+}
