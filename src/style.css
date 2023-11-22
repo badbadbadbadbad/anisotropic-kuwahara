@@ -1,7 +1,49 @@
+:root {
+  --grey-shade1: #1c1c1f;
+  --grey-shade2: #403e4b;
+  --grey-shade3: #625e79;
+  --grey-shade4: #8781a4;
+  --grey-shade5: #b1acc7;
+  --grey-shade6: #dcdae7;
+}
+
 @font-face {
   font-family: "OpenSans";
   src: url("../fonts/OpenSans-VariableFont_wdth\,wght.ttf") format("ttf"),
     url("../fonts/OpenSans-Italic-VariableFont_wdth\,wght.ttf") format("ttf");
   font-weight: 400;
   font-style: normal;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: "Open Sans", "sans-serif";
+  background-color: var(--grey-shade1);
+  display: flex;
+}
+
+.half {
+  height: 100%;
+  width: 50%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#control-panel {
+  height: 70%;
+  width: 50%;
+  background-color: var(--grey-shade2);
+  border-radius: 15px;
+  border: 2px solid var(--grey-shade5);
+  padding: 20px;
 }
