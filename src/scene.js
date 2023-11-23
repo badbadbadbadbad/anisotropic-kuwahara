@@ -1,112 +1,174 @@
 import * as THREE from "three";
-import testImage from "../img/test.png";
+
+// Image source
+// https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
+import sampleImage from "../img/cat.png";
 
 function setupScene() {
-  // Get parent element
-  const canvas = document.getElementById("canvas");
+  // Get HTML container element for scene
+  const containerHTML = document.getElementById("canvas-container");
+
+  const HTMLelems = {
+    container: containerHTML,
+  };
+
+  // Image stuff
+  const imageData = {
+    dataURL: sampleImage,
+    aspectRatio: 0,
+  };
 
   // Scene
   const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1c1c1f);
+
+  // Setup canvas plane
+  const geometry = new THREE.PlaneGeometry(1, 1);
+  const material = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
+  scene.add(new THREE.Mesh(geometry, material));
 
   // Camera
   const camera = new THREE.OrthographicCamera(
-    canvas.clientWidth / -2,
-    canvas.clientWidth / 2,
-    canvas.clientHeight / 2,
-    canvas.clientHeight / -2,
+    HTMLelems.container.clientWidth / -2,
+    HTMLelems.container.clientWidth / 2,
+    HTMLelems.container.clientHeight / 2,
+    HTMLelems.container.clientHeight / -2,
     1,
     1000
   );
   camera.position.z = 5;
 
-  // Renderer
-  const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-  canvas.appendChild(renderer.domElement);
-
-  // Create a plane
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  const plane = new THREE.Mesh(geometry, material);
-  scene.add(plane);
-
   // Set camera position to look directly at the plane from above
   camera.position.set(0, 0, 1);
   camera.lookAt(scene.position);
 
-  // Load image
-  let imageAspectRatio;
-  const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(
-    testImage,
-    (texture) => {
-      // Load texture
-      const textureMaterial = new THREE.MeshBasicMaterial({ map: texture });
-      plane.material = textureMaterial;
+  // Renderer
+  const renderer = new THREE.WebGLRenderer();
+  renderer.setSize(HTMLelems.container.clientWidth, HTMLelems.container.clientHeight);
+  HTMLelems.container.appendChild(renderer.domElement);
 
-      // Adjust plane size to fit the viewport
-      imageAspectRatio = texture.image.width / texture.image.height;
-      const canvasAspectRatio = canvas.clientWidth / canvas.clientHeight;
-
-      let height;
-      let width;
-      if (imageAspectRatio >= canvasAspectRatio) {
-        // Image reaches left/right of screen
-        width = canvas.clientWidth;
-        height = width / imageAspectRatio;
-      } else {
-        // Image reaches top/bottom of screen
-        height = canvas.clientHeight;
-        width = height * imageAspectRatio;
-      }
-
-      plane.geometry = new THREE.PlaneGeometry(width, height);
-    },
-    undefined,
-    (error) => console.error("Error loading texture image", error)
-  );
+  // First image scene load
+  reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
 
   // Animation function
   const animate = () => {
     requestAnimationFrame(animate);
-
-    // Render the scene
     renderer.render(scene, camera);
   };
 
   // Handle container resize
-  const handleResize = () => {
-    const newWidth = canvas.clientWidth;
-    const newHeight = canvas.clientHeight;
+  window.addEventListener("resize", () => {
+    reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData);
+  });
 
-    renderer.setSize(newWidth, newHeight);
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
 
-    const canvasAspectRatio = newWidth / newHeight;
+  document.body.addEventListener("drop", async (event) => {
+    // Get first file
+    const file = event.dataTransfer.files[0];
 
-    let height;
-    let width;
-    if (imageAspectRatio >= canvasAspectRatio) {
-      // Image reaches left/right of screen
-      width = canvas.clientWidth;
-      height = width / imageAspectRatio;
-    } else {
-      // Image reaches top/bottom of screen
-      height = canvas.clientHeight;
-      width = height * imageAspectRatio;
+    // Check if image
+    if (isImage(file)) {
+      try {
+        // const imgURL = await readImage(file);
+        // imageAspectRatio = loadTexture(canvas, plane, imgURL);
+
+        imageData.dataURL = await readImage(file);
+        reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
+      } catch (error) {
+        console.error("Error reading dropped image:", error);
+      }
     }
-
-    plane.geometry = new THREE.PlaneGeometry(width, height);
-
-    camera.left = -newWidth / 2;
-    camera.right = newWidth / 2;
-    camera.top = newHeight / 2;
-    camera.bottom = -newHeight / 2;
-    camera.updateProjectionMatrix();
-  };
-  window.addEventListener("resize", handleResize);
+  });
 
   // Start the animation
   animate();
+}
+
+// TODO: Make the onload loop as small as needed
+function reloadImageScene(container, renderer, camera, scene, imageData, updateTex = false) {
+  // Remove existing image plane so it can be overwritten by new one
+  /*
+  if (scene.children.length > 0) {
+    scene.remove(scene.children[0]);
+  }
+  */
+
+  // Load image URL to texture
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load(
+    imageData.dataURL,
+    (texture) => {
+      // From linearSRGB to SRGB to fix image looking overexposed
+      texture.colorSpace = THREE.SRGBColorSpace;
+
+      // Save image aspect ratio for resize handler
+      imageData.aspectRatio = texture.image.width / texture.image.height;
+
+      // Container ratio to ...
+      const canvasAspectRatio = container.clientWidth / container.clientHeight;
+
+      let height;
+      let width;
+      if (imageData.aspectRatio >= canvasAspectRatio) {
+        // Image reaches left/right of screen
+        width = container.clientWidth;
+        height = width / imageData.aspectRatio;
+      } else {
+        // Image reaches top/bottom of screen
+        height = container.clientHeight;
+        width = height * imageData.aspectRatio;
+      }
+
+      if (updateTex) {
+        const mat = new THREE.MeshBasicMaterial({ map: texture });
+        scene.children[0].material = mat;
+      }
+
+      scene.children[0].scale.x = width;
+      scene.children[0].scale.y = height;
+
+      // Set renderer and camera to plane size
+      renderer.setSize(width, height);
+
+      camera.left = -width / 2;
+      camera.right = width / 2;
+      camera.top = height / 2;
+      camera.bottom = -height / 2;
+
+      camera.updateProjectionMatrix();
+    },
+    undefined,
+    (error) => console.error("Error loading texture image", error)
+  );
+}
+
+function isImage(file) {
+  const allowedTypes = ["image/jpeg", "image/png"];
+  return allowedTypes.includes(file.type);
+}
+
+function readImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("loadend", () => {
+      resolve(reader.result);
+    });
+
+    reader.addEventListener("error", (error) => {
+      reject(error);
+    });
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function preventDefaults(event) {
+  event.preventDefault();
+  event.stopPropagation();
 }
 
 export default setupScene;

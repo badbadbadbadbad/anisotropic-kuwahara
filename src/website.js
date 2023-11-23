@@ -28,7 +28,13 @@ function setupControlPanel() {
 function setupThreeScene() {
   const container = document.createElement("div");
   container.classList.add("half");
-  container.id = "canvas";
+  container.id = "canvas-container";
+
+  /*
+  const canvas = document.createElement("div");
+  canvas.id = "canvas";
+  container.appendChild(canvas);
+  */
 
   return container;
 }
