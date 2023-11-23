@@ -26,17 +26,15 @@ function setupControlPanel() {
 }
 
 function setupThreeScene() {
+  const outerContainer = document.createElement("div");
+  outerContainer.classList.add("half");
+
   const container = document.createElement("div");
-  container.classList.add("half");
+  // container.classList.add("half");
   container.id = "canvas-container";
+  outerContainer.appendChild(container);
 
-  /*
-  const canvas = document.createElement("div");
-  canvas.id = "canvas";
-  container.appendChild(canvas);
-  */
-
-  return container;
+  return outerContainer;
 }
 
 export default createWebsite;

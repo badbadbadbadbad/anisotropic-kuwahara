@@ -35,7 +35,8 @@ body {
   height: 100%;
   width: 50%;
   margin: 0;
-  padding: 0;
+  padding: 20px 20px 20px 0px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,4 +49,13 @@ body {
   border-radius: 15px;
   border: 2px solid var(--grey-shade5);
   padding: 20px;
+}
+
+#canvas-container {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

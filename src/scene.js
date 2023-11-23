@@ -4,6 +4,8 @@ import * as THREE from "three";
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
 import sampleImage from "../img/cat.png";
 
+const hexColor = "#b1acc7";
+
 function setupScene() {
   // Get HTML container element for scene
   const containerHTML = document.getElementById("canvas-container");
@@ -47,6 +49,9 @@ function setupScene() {
   renderer.setSize(HTMLelems.container.clientWidth, HTMLelems.container.clientHeight);
   HTMLelems.container.appendChild(renderer.domElement);
 
+  renderer.domElement.style.border = `2px solid ${hexColor}`;
+  renderer.domElement.style.borderRadius = "5px";
+
   // First image scene load
   reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
 
@@ -89,13 +94,6 @@ function setupScene() {
 
 // TODO: Make the onload loop as small as needed
 function reloadImageScene(container, renderer, camera, scene, imageData, updateTex = false) {
-  // Remove existing image plane so it can be overwritten by new one
-  /*
-  if (scene.children.length > 0) {
-    scene.remove(scene.children[0]);
-  }
-  */
-
   // Load image URL to texture
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load(
@@ -145,8 +143,9 @@ function reloadImageScene(container, renderer, camera, scene, imageData, updateT
   );
 }
 
+// TODO: Check which image types TextureLoader can handle
 function isImage(file) {
-  const allowedTypes = ["image/jpeg", "image/png"];
+  const allowedTypes = ["image/jpeg", "image/png", "image/avif", "image/bmp", "image/gif", "image/webp"];
   return allowedTypes.includes(file.type);
 }
 
