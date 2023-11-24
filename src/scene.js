@@ -2,8 +2,9 @@ import * as THREE from "three"; // eslint-disable-line import/no-unresolved
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer";
 import { RenderPass } from "three/addons/postprocessing/RenderPass";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass";
-import { SobelOperatorShader } from "three/addons/shaders/SobelOperatorShader";
-import CopyShader from "./shaders/copyShader";
+import structureTensorShader from "./shaders/structureTensor";
+import gaussianBlurHorizontalShader from "./shaders/gaussianBlurHorizontal";
+import gaussianBlurVerticalShader from "./shaders/gaussianBlurVertical";
 
 // Image source
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
@@ -23,6 +24,7 @@ function setupScene() {
   // Image stuff
   const imageData = {
     dataURL: sampleImage,
+    texture: new THREE.Texture(),
     aspectRatio: 0,
   };
 
@@ -58,12 +60,45 @@ function setupScene() {
   renderer.domElement.style.border = `2px solid ${hexColor}`;
   renderer.domElement.style.borderRadius = "5px";
 
+  // ! Postprocessing pipeline initialization
+  const composer = new EffectComposer(renderer);
+
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  const effectStructureTensor = new ShaderPass(structureTensorShader);
+  renderer.getSize(effectStructureTensor.uniforms.resolution.value);
+  composer.addPass(effectStructureTensor);
+
+  const effectGaussianBlurHorizontal = new ShaderPass(gaussianBlurHorizontalShader);
+  renderer.getSize(effectGaussianBlurHorizontal.uniforms.resolution.value);
+  composer.addPass(effectGaussianBlurHorizontal);
+
+  const effectGaussianBlurVertical = new ShaderPass(gaussianBlurVerticalShader);
+  renderer.getSize(effectGaussianBlurVertical.uniforms.resolution.value);
+  composer.addPass(effectGaussianBlurVertical);
+
+  // ! Uniforms for the shader
+  /*
+  const uniforms = {
+    texMap: { value: new THREE.Texture() },
+    resolution: { value: new THREE.Vector2() },
+  };
+  */
+
+  // ! Collect shader passes into object to make it more readable
+  const shaderPasses = {
+    structureTensor: effectStructureTensor,
+    gaussHorizontal: effectGaussianBlurHorizontal,
+    gaussVertical: effectGaussianBlurVertical,
+  };
+
   // ! First image scene load
-  reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
+  reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
 
   // ! Handle container resize
   window.addEventListener("resize", () => {
-    reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData);
+    reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
   });
 
   // ! Drag and drop
@@ -78,26 +113,12 @@ function setupScene() {
     if (isImage(file)) {
       try {
         imageData.dataURL = await readImage(file);
-        reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
+        reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
       } catch (error) {
         console.error("Error reading dropped image:", error);
       }
     }
   });
-
-  // ! Postprocessing
-  const composer = new EffectComposer(renderer);
-
-  const renderPass = new RenderPass(scene, camera);
-  composer.addPass(renderPass);
-
-  CopyShader.glslVersion = THREE.GLSL3;
-  const effectCopy = new ShaderPass(CopyShader);
-  composer.addPass(effectCopy);
-
-  const effectSobel = new ShaderPass(SobelOperatorShader);
-  renderer.getSize(effectSobel.uniforms.resolution.value);
-  composer.addPass(effectSobel);
 
   // Start the animation
   const animate = () => {
@@ -113,9 +134,10 @@ function setupScene() {
   animate();
 }
 
-// TODO: Make the onload loop as small as needed
-function reloadImageScene(container, renderer, camera, scene, imageData, updateTex = false) {
-  // Load image URL to texture
+// TODO: Combine parameters
+function reloadImageScene(container, renderer, composer, camera, scene, imageData, shaderPasses, updateTex = false) {
+  let height;
+  let width;
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load(
     imageData.dataURL,
@@ -124,13 +146,12 @@ function reloadImageScene(container, renderer, camera, scene, imageData, updateT
       texture.colorSpace = THREE.SRGBColorSpace;
 
       // Save image aspect ratio for resize handler
+      imageData.texture = texture;
       imageData.aspectRatio = texture.image.width / texture.image.height;
 
       // Container ratio to ...
       const canvasAspectRatio = container.clientWidth / container.clientHeight;
 
-      let height;
-      let width;
       if (imageData.aspectRatio >= canvasAspectRatio) {
         // Image reaches left/right of screen
         width = container.clientWidth;
@@ -146,11 +167,26 @@ function reloadImageScene(container, renderer, camera, scene, imageData, updateT
         scene.children[0].material = mat;
       }
 
+      // Uniforms
+      shaderPasses.structureTensor.uniforms.resolution.value.x = width;
+      shaderPasses.structureTensor.uniforms.resolution.value.y = height;
+      shaderPasses.gaussHorizontal.uniforms.resolution.value.x = width;
+      shaderPasses.gaussHorizontal.uniforms.resolution.value.y = height;
+      shaderPasses.gaussVertical.uniforms.resolution.value.x = width;
+      shaderPasses.gaussVertical.uniforms.resolution.value.y = height;
+      /*
+      effectStructureTensor.uniforms.resolution.value.x = width;
+      effectStructureTensor.uniforms.resolution.value.y = height;
+      effectGaussianBlurHorizontal.uniforms.resolution.value.x = width;
+      effectGaussianBlurHorizontal.uniforms.resolution.value.y = height;
+      */
+
       scene.children[0].scale.x = width;
       scene.children[0].scale.y = height;
 
       // Set renderer and camera to plane size
       renderer.setSize(width, height);
+      composer.setSize(width, height);
 
       camera.left = -width / 2;
       camera.right = width / 2;
