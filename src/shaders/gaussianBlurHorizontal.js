@@ -48,7 +48,7 @@ const gaussianBlurHorizontalShader = {
   void main() {
     vec2 texelSize = vec2(1. / resolution.x, 1. / resolution.y);
 
-    int kernelRadius = 5;
+    int kernelRadius = 7;
     float kernelSum = 0.;
 
     for (int xOffset = -kernelRadius; xOffset <= kernelRadius; xOffset++) {
@@ -59,7 +59,7 @@ const gaussianBlurHorizontalShader = {
       kernelSum += gauss;
     }
 
-    gl_FragColor /= kernelSum;
+    gl_FragColor = vec4(gl_FragColor.rgb / kernelSum, 1.);
   }`,
 
   glslVersion: THREE.GLSL3,

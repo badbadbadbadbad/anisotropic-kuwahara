@@ -5,6 +5,7 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass";
 import structureTensorShader from "./shaders/structureTensor";
 import gaussianBlurHorizontalShader from "./shaders/gaussianBlurHorizontal";
 import gaussianBlurVerticalShader from "./shaders/gaussianBlurVertical";
+import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
 
 // Image source
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
@@ -17,9 +18,11 @@ function setupScene() {
   // Get HTML container element for scene
   const containerHTML = document.getElementById("canvas-container");
 
+  /*
   const HTMLelems = {
     container: containerHTML,
   };
+  */
 
   // Image stuff
   const imageData = {
@@ -39,10 +42,10 @@ function setupScene() {
 
   // Camera
   const camera = new THREE.OrthographicCamera(
-    HTMLelems.container.clientWidth / -2,
-    HTMLelems.container.clientWidth / 2,
-    HTMLelems.container.clientHeight / 2,
-    HTMLelems.container.clientHeight / -2,
+    containerHTML.clientWidth / -2,
+    containerHTML.clientWidth / 2,
+    containerHTML.clientHeight / 2,
+    containerHTML.clientHeight / -2,
     1,
     1000
   );
@@ -54,8 +57,8 @@ function setupScene() {
 
   // Renderer
   const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(HTMLelems.container.clientWidth, HTMLelems.container.clientHeight);
-  HTMLelems.container.appendChild(renderer.domElement);
+  renderer.setSize(containerHTML.clientWidth, containerHTML.clientHeight);
+  containerHTML.appendChild(renderer.domElement);
 
   renderer.domElement.style.border = `2px solid ${hexColor}`;
   renderer.domElement.style.borderRadius = "5px";
@@ -78,6 +81,10 @@ function setupScene() {
   renderer.getSize(effectGaussianBlurVertical.uniforms.resolution.value);
   composer.addPass(effectGaussianBlurVertical);
 
+  const effectAnisotropicKuwahara = new ShaderPass(anisotropicKuwaharaShader);
+  renderer.getSize(effectAnisotropicKuwahara.uniforms.resolution.value);
+  composer.addPass(effectAnisotropicKuwahara);
+
   // ! Uniforms for the shader
   /*
   const uniforms = {
@@ -91,14 +98,15 @@ function setupScene() {
     structureTensor: effectStructureTensor,
     gaussHorizontal: effectGaussianBlurHorizontal,
     gaussVertical: effectGaussianBlurVertical,
+    anisotropicKuwahara: effectAnisotropicKuwahara,
   };
 
   // ! First image scene load
-  reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
+  reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
 
   // ! Handle container resize
   window.addEventListener("resize", () => {
-    reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
+    reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
   });
 
   // ! Drag and drop
@@ -113,7 +121,7 @@ function setupScene() {
     if (isImage(file)) {
       try {
         imageData.dataURL = await readImage(file);
-        reloadImageScene(HTMLelems.container, renderer, composer, camera, scene, imageData, shaderPasses, true);
+        reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
       } catch (error) {
         console.error("Error reading dropped image:", error);
       }
@@ -165,6 +173,7 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       if (updateTex) {
         const mat = new THREE.MeshBasicMaterial({ map: texture });
         scene.children[0].material = mat;
+        shaderPasses.anisotropicKuwahara.uniforms.inputTex.value = texture;
       }
 
       // Uniforms
@@ -174,6 +183,9 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       shaderPasses.gaussHorizontal.uniforms.resolution.value.y = height;
       shaderPasses.gaussVertical.uniforms.resolution.value.x = width;
       shaderPasses.gaussVertical.uniforms.resolution.value.y = height;
+      shaderPasses.anisotropicKuwahara.uniforms.resolution.value.x = width;
+      shaderPasses.anisotropicKuwahara.uniforms.resolution.value.y = height;
+
       /*
       effectStructureTensor.uniforms.resolution.value.x = width;
       effectStructureTensor.uniforms.resolution.value.y = height;
