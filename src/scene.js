@@ -1,9 +1,15 @@
-import * as THREE from "three";
+import * as THREE from "three"; // eslint-disable-line import/no-unresolved
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer";
+import { RenderPass } from "three/addons/postprocessing/RenderPass";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass";
+import { SobelOperatorShader } from "three/addons/shaders/SobelOperatorShader";
+import CopyShader from "./shaders/copyShader";
 
 // Image source
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
 import sampleImage from "../img/cat.png";
 
+// Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
 
 function setupScene() {
@@ -52,34 +58,25 @@ function setupScene() {
   renderer.domElement.style.border = `2px solid ${hexColor}`;
   renderer.domElement.style.borderRadius = "5px";
 
-  // First image scene load
+  // ! First image scene load
   reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
 
-  // Animation function
-  const animate = () => {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  };
-
-  // Handle container resize
+  // ! Handle container resize
   window.addEventListener("resize", () => {
     reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData);
   });
 
+  // ! Drag and drop
   ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
     document.body.addEventListener(eventName, preventDefaults, false);
   });
 
   document.body.addEventListener("drop", async (event) => {
-    // Get first file
+    // Get first file only in case of multi-upload
     const file = event.dataTransfer.files[0];
 
-    // Check if image
     if (isImage(file)) {
       try {
-        // const imgURL = await readImage(file);
-        // imageAspectRatio = loadTexture(canvas, plane, imgURL);
-
         imageData.dataURL = await readImage(file);
         reloadImageScene(HTMLelems.container, renderer, camera, scene, imageData, true);
       } catch (error) {
@@ -88,7 +85,31 @@ function setupScene() {
     }
   });
 
+  // ! Postprocessing
+  const composer = new EffectComposer(renderer);
+
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  CopyShader.glslVersion = THREE.GLSL3;
+  const effectCopy = new ShaderPass(CopyShader);
+  composer.addPass(effectCopy);
+
+  const effectSobel = new ShaderPass(SobelOperatorShader);
+  renderer.getSize(effectSobel.uniforms.resolution.value);
+  composer.addPass(effectSobel);
+
   // Start the animation
+  const animate = () => {
+    requestAnimationFrame(animate);
+
+    // Non-postprocessing version
+    // renderer.render(scene, camera);
+
+    // Postprocessing version
+    composer.render();
+  };
+
   animate();
 }
 
@@ -143,7 +164,6 @@ function reloadImageScene(container, renderer, camera, scene, imageData, updateT
   );
 }
 
-// TODO: Check which image types TextureLoader can handle
 function isImage(file) {
   const allowedTypes = ["image/jpeg", "image/png", "image/avif", "image/bmp", "image/gif", "image/webp"];
   return allowedTypes.includes(file.type);

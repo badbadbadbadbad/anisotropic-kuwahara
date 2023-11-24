@@ -14,5 +14,8 @@
     "quotes": ["error", "double"],
     "no-param-reassign": ["error", { "props": false }],
     "no-use-before-define": ["error", { "functions": false, "classes": false }]
+  },
+  "settings": {
+    "import/resolver": "webpack"
   }
 }

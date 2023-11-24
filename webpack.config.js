@@ -1,6 +1,6 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin"); // eslint-disable-line import/no-extraneous-dependencies
-const NodePolyfillPlugin = require("node-polyfill-webpack-plugin"); // eslint-disable-line import/no-extraneous-dependencies
+const path = require("node:path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -32,6 +32,10 @@ module.exports = {
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: "asset/resource",
+      },
+      {
+        // test: /\.(glsl|vert|frag)$/i,
+        // type: "asset/source",
       },
     ],
   },

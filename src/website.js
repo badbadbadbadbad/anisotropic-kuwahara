@@ -1,6 +1,5 @@
 import setupScene from "./scene";
 import "./style.css";
-// import setupScene from "./scene";
 
 function createWebsite() {
   const controlPanel = setupControlPanel();
@@ -30,7 +29,6 @@ function setupThreeScene() {
   outerContainer.classList.add("half");
 
   const container = document.createElement("div");
-  // container.classList.add("half");
   container.id = "canvas-container";
   outerContainer.appendChild(container);
 
