@@ -186,13 +186,6 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       shaderPasses.anisotropicKuwahara.uniforms.resolution.value.x = width;
       shaderPasses.anisotropicKuwahara.uniforms.resolution.value.y = height;
 
-      /*
-      effectStructureTensor.uniforms.resolution.value.x = width;
-      effectStructureTensor.uniforms.resolution.value.y = height;
-      effectGaussianBlurHorizontal.uniforms.resolution.value.x = width;
-      effectGaussianBlurHorizontal.uniforms.resolution.value.y = height;
-      */
-
       scene.children[0].scale.x = width;
       scene.children[0].scale.y = height;
 

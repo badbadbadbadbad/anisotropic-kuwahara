@@ -7,7 +7,6 @@
  * Visualization and Processing of Tensor Fields (2006), 17–47.
  *
  * Notes:
- *  - The Sobel filter could be optimized slightly more by removing duplicate samplings, but is left as is for readability.
  *  - The source for this is the book "GPU Pro Advanced Rendering Techniques", which normalized the Sobel operator by 1/4.
  *    As such, this implementation uses the same normalizing factor.
  */
@@ -48,22 +47,27 @@ const structureTensorShader = {
   void main() {
     vec2 texelSize = vec2(1. / resolution.x, 1. / resolution.y);
 
+    vec3 bottomLeft = texture2D(tDiffuse, vUv + vec2(-texelSize.x, -texelSize.y)).rgb;
+    vec3 topLeft = texture2D(tDiffuse, vUv + vec2(-texelSize.x, texelSize.y)).rgb;
+    vec3 bottomRight = texture2D(tDiffuse, vUv + vec2(texelSize.x, -texelSize.y)).rgb;
+    vec3 topRight = texture2D(tDiffuse, vUv + vec2(texelSize.x, texelSize.y)).rgb;
+
     vec3 Sx = (
-      1. * texture2D(tDiffuse, vUv + vec2(-texelSize.x, -texelSize.y)).rgb + 
+      1. * bottomLeft + 
       2. * texture2D(tDiffuse, vUv + vec2(-texelSize.x, 0.)).rgb + 
-      1. * texture2D(tDiffuse, vUv + vec2(-texelSize.x, texelSize.y)).rgb + 
-      -1. * texture2D(tDiffuse, vUv + vec2(texelSize.x, -texelSize.y)).rgb + 
+      1. * topLeft + 
+      -1. * bottomRight + 
       -2. * texture2D(tDiffuse, vUv + vec2(texelSize.x, 0.)).rgb + 
-      -1. * texture2D(tDiffuse, vUv + vec2(texelSize.x, texelSize.y)).rgb
+      -1. * topRight
     ) / 4.;
 
     vec3 Sy = (
-      1. * texture2D(tDiffuse, vUv + vec2(-texelSize.x, -texelSize.y)).rgb +
-      2. * texture2D(tDiffuse, vUv + vec2(0., -texelSize.y)).rgb +
-      1. * texture2D(tDiffuse, vUv + vec2(texelSize.x, -texelSize.y)).rgb +
-      -1. * texture2D(tDiffuse, vUv + vec2(-texelSize.x, texelSize.y)).rgb +
-      -2. * texture2D(tDiffuse, vUv + vec2(0., texelSize.y)).rgb +
-      -1. * texture2D(tDiffuse, vUv + vec2(texelSize.x, texelSize.y)).rgb
+      -1. * bottomLeft +
+      -2. * texture2D(tDiffuse, vUv + vec2(0., -texelSize.y)).rgb +
+      -1. * bottomRight +
+      1. * topLeft +
+      2. * texture2D(tDiffuse, vUv + vec2(0., texelSize.y)).rgb +
+      1. * topRight
     ) / 4.;
 
     // Structure tensor matrix is (SxSx, SxSy, SxSy, SySy)

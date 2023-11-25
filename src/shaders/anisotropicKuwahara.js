@@ -57,22 +57,22 @@ const anisotropicKuwaharaShader = {
     float A = (lambda1 + lambda2 > 0.) ? (lambda1 - lambda2) / (lambda1 + lambda2) : 0.;
 
     float alpha = 1.;
-    int kernelRadius = 4;
-    float a = float(kernelRadius) * clamp((alpha + A) / alpha, 0.9 * float(kernelRadius), 2. * float(kernelRadius));
-    float b = float(kernelRadius) * clamp(alpha / (alpha + A), float(kernelRadius) / 2., float(kernelRadius));
+    int kernelRadius = 3;
+    float a = float(kernelRadius) * clamp((alpha + A) / alpha, float(kernelRadius) * 0.5, float(kernelRadius) * 2.);
+    float b = float(kernelRadius) * clamp(alpha / (alpha + A), float(kernelRadius) * 0.5, float(kernelRadius));
 
     float cosPhi = cos(phi);
     float sinPhi = sin(phi);
 
     mat2 R = mat2(cosPhi, -sinPhi, sinPhi, cosPhi);
-    mat2 S = mat2(1.0 / a, 0., 0., 1.0 / b);
+    mat2 S = mat2(0.8 / a, 0., 0., 0.8 / b);
     mat2 SR = S * R;
 
     int maxX = int(sqrt(a * a * cosPhi * cosPhi + b * b * sinPhi * sinPhi));
     int maxY = int(sqrt(a * a * sinPhi * sinPhi + b * b * cosPhi * cosPhi));
 
     float zeta = 2. / float(kernelRadius);
-    float zeroCross = 0.75; // 0.4 - 0.78. Ace used 0.58
+    float zeroCross = 0.78; // 0.4 - 0.78. Ace used 0.58
     float sinZeroCross = sin(zeroCross);
     float eta = (zeta + cos(zeroCross)) / (sinZeroCross * sinZeroCross);
 
@@ -88,7 +88,7 @@ const anisotropicKuwaharaShader = {
     for (int y = -maxY; y <= maxY; y++) {
       for (int x = -maxX; x <= maxX; x++) {
         v = SR * vec2(x, y);
-        if (dot(v, v) <= 2.) {
+        if (dot(v, v) <= 1.) {
           vec3 tex = texture2D(inputTex, vUv + vec2(x, y) * texelSize).rgb;
           tex = clamp(tex, 0., 1.);
 

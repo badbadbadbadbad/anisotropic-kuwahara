@@ -48,7 +48,7 @@ const gaussianBlurVerticalShader = {
   void main() {
     vec2 texelSize = vec2(1. / resolution.x, 1. / resolution.y);
 
-    int kernelRadius = 7;
+    int kernelRadius = 5;
     float kernelSum = 0.;
 
     for (int yOffset = -kernelRadius; yOffset <= kernelRadius; yOffset++) {
