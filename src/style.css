@@ -51,6 +51,10 @@ body {
   padding: 20px;
 }
 
+#right-half {
+  position: relative;
+}
+
 #canvas-container {
   box-sizing: border-box;
   height: 100%;

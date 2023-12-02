@@ -27,6 +27,7 @@ function setupControlPanel() {
 function setupThreeScene() {
   const outerContainer = document.createElement("div");
   outerContainer.classList.add("half");
+  outerContainer.id = "right-half";
 
   const container = document.createElement("div");
   container.id = "canvas-container";

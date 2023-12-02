@@ -1,4 +1,6 @@
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved
+import Stats from "three/examples/jsm/libs/stats.module";
+import { GUI } from "dat.gui";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer";
 import { RenderPass } from "three/addons/postprocessing/RenderPass";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass";
@@ -62,6 +64,15 @@ function setupScene() {
 
   renderer.domElement.style.border = `2px solid ${hexColor}`;
   renderer.domElement.style.borderRadius = "5px";
+
+  // GUI & FPS counter
+  const gui = new GUI();
+  gui.addFolder("test");
+
+  const stats = new Stats();
+  stats.showPanel(0);
+  stats.domElement.style.position = "absolute";
+  containerHTML.appendChild(stats.domElement);
 
   // ! Postprocessing pipeline initialization
   const composer = new EffectComposer(renderer);
@@ -128,15 +139,39 @@ function setupScene() {
     }
   });
 
-  // Start the animation
-  const animate = () => {
-    requestAnimationFrame(animate);
+  // Clock to limit FPS
+  const clock = new THREE.Clock();
+  let delta = 0;
+  const interval = 1 / 4; // Denominator is FPS. Change as wanted.
 
+  // Start the animations
+  const animate = () => {
+    // FPS counter
+    // stats.begin();
+
+    requestAnimationFrame(animate);
+    delta += clock.getDelta();
+
+    if (delta > interval) {
+      stats.begin();
+      // Non-postprocessing version
+      // renderer.render(scene, camera);
+
+      // Postprocessing version
+      composer.render();
+
+      delta %= interval;
+
+      stats.end();
+    }
     // Non-postprocessing version
     // renderer.render(scene, camera);
 
     // Postprocessing version
-    composer.render();
+    // composer.render();
+
+    // FPS counter
+    // stats.end();
   };
 
   animate();
@@ -177,14 +212,7 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       }
 
       // Uniforms
-      shaderPasses.structureTensor.uniforms.resolution.value.x = width;
-      shaderPasses.structureTensor.uniforms.resolution.value.y = height;
-      shaderPasses.gaussHorizontal.uniforms.resolution.value.x = width;
-      shaderPasses.gaussHorizontal.uniforms.resolution.value.y = height;
-      shaderPasses.gaussVertical.uniforms.resolution.value.x = width;
-      shaderPasses.gaussVertical.uniforms.resolution.value.y = height;
-      shaderPasses.anisotropicKuwahara.uniforms.resolution.value.x = width;
-      shaderPasses.anisotropicKuwahara.uniforms.resolution.value.y = height;
+      updateUniforms(shaderPasses, new THREE.Vector2(width, height));
 
       scene.children[0].scale.x = width;
       scene.children[0].scale.y = height;
@@ -229,6 +257,12 @@ function readImage(file) {
 function preventDefaults(event) {
   event.preventDefault();
   event.stopPropagation();
+}
+
+function updateUniforms(shaderPasses, resolutionVector) {
+  Object.keys(shaderPasses).forEach((pass) => {
+    shaderPasses[pass].uniforms.resolution.value = resolutionVector;
+  });
 }
 
 export default setupScene;

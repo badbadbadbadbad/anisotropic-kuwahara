@@ -24,6 +24,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "three": "^0.158.0"
   }
