@@ -143,7 +143,7 @@ function setupScene() {
   addGUISetting(effectKuwahara, effectKuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
 
   const gammaFolder = gui.addFolder("Gamma correction");
-  addGUISetting(effectGamma, effectGamma.uniforms.gamma, gammaFolder, 0.1, 2.5, 0.1, "Gamma");
+  addGUISetting(effectGamma, effectGamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
 
   // Clock to limit FPS
   const clock = new THREE.Clock();
