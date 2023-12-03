@@ -8,6 +8,7 @@ import structureTensorShader from "./shaders/structureTensor";
 import gaussianBlurHorizontalShader from "./shaders/gaussianBlurHorizontal";
 import gaussianBlurVerticalShader from "./shaders/gaussianBlurVertical";
 import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
+import gammaShader from "./shaders/gammaShader";
 
 // Image source
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
@@ -98,6 +99,9 @@ function setupScene() {
   renderer.getSize(effectKuwahara.uniforms.resolution.value);
   composer.addPass(effectKuwahara);
 
+  const effectGamma = new ShaderPass(gammaShader);
+  composer.addPass(effectGamma);
+
   // ! Collect shader passes into object to make it more readable
   const shaderPasses = {
     structureTensor: effectStructureTensor,
@@ -137,6 +141,9 @@ function setupScene() {
   const gui = new GUI();
   const kuwaharaFolder = gui.addFolder("Kuwahara");
   addGUISetting(effectKuwahara, effectKuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
+
+  const gammaFolder = gui.addFolder("Gamma correction");
+  addGUISetting(effectGamma, effectGamma.uniforms.gamma, gammaFolder, 0.1, 2.5, 0.1, "Gamma");
 
   // Clock to limit FPS
   const clock = new THREE.Clock();

@@ -161,9 +161,7 @@ const anisotropicKuwaharaShader = {
       gl_FragColor += vec4(m[k].rgb * w, w);
     }
 
-    vec4 gamma = vec4(0.6);
-
-    gl_FragColor = pow(clamp(gl_FragColor / gl_FragColor.w, 0., 1.), gamma);
+    gl_FragColor = clamp(gl_FragColor / gl_FragColor.w, 0., 1.);
   }`,
 
   glslVersion: THREE.GLSL3,
