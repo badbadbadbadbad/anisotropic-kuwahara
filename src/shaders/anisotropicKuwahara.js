@@ -15,6 +15,7 @@ const anisotropicKuwaharaShader = {
     tDiffuse: { value: null },
     inputTex: { value: null },
     resolution: { value: new THREE.Vector2() },
+    kernelRadius: { value: 3 },
   },
 
   vertexShader: /* glsl version 300 es */ `
@@ -22,6 +23,7 @@ const anisotropicKuwaharaShader = {
   uniform sampler2D tDiffuse;
   uniform sampler2D inputTex;
   uniform vec2 resolution;
+  uniform int kernelRadius;
 
   // Outs
   out vec2 vUv;
@@ -36,6 +38,7 @@ const anisotropicKuwaharaShader = {
   uniform sampler2D tDiffuse;
   uniform sampler2D inputTex;
   uniform vec2 resolution;
+  uniform int kernelRadius;
 
   // Ins
   in vec2 vUv;
@@ -57,7 +60,7 @@ const anisotropicKuwaharaShader = {
     float A = (lambda1 + lambda2 > 0.) ? (lambda1 - lambda2) / (lambda1 + lambda2) : 0.;
 
     float alpha = 1.;
-    int kernelRadius = 3;
+    // int kernelRadius = 3;
     float a = float(kernelRadius) * clamp((alpha + A) / alpha, float(kernelRadius) * 0.5, float(kernelRadius) * 2.);
     float b = float(kernelRadius) * clamp(alpha / (alpha + A), float(kernelRadius) * 0.5, float(kernelRadius));
 

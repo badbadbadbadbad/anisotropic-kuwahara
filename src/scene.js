@@ -16,6 +16,9 @@ import sampleImage from "../img/cat.png";
 // Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
 
+// Switch to true if Stats.js FPS counter should be used.
+const useFPSCounter = false;
+
 function setupScene() {
   // Get HTML container element for scene
   const containerHTML = document.getElementById("canvas-container");
@@ -65,14 +68,13 @@ function setupScene() {
   renderer.domElement.style.border = `2px solid ${hexColor}`;
   renderer.domElement.style.borderRadius = "5px";
 
-  // GUI & FPS counter
-  const gui = new GUI();
-  gui.addFolder("test");
-
+  // Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
-  stats.showPanel(0);
-  stats.domElement.style.position = "absolute";
-  containerHTML.appendChild(stats.domElement);
+  if (useFPSCounter) {
+    stats.showPanel(0);
+    stats.domElement.style.position = "absolute";
+    containerHTML.appendChild(stats.domElement);
+  }
 
   // ! Postprocessing pipeline initialization
   const composer = new EffectComposer(renderer);
@@ -92,24 +94,16 @@ function setupScene() {
   renderer.getSize(effectGaussianBlurVertical.uniforms.resolution.value);
   composer.addPass(effectGaussianBlurVertical);
 
-  const effectAnisotropicKuwahara = new ShaderPass(anisotropicKuwaharaShader);
-  renderer.getSize(effectAnisotropicKuwahara.uniforms.resolution.value);
-  composer.addPass(effectAnisotropicKuwahara);
-
-  // ! Uniforms for the shader
-  /*
-  const uniforms = {
-    texMap: { value: new THREE.Texture() },
-    resolution: { value: new THREE.Vector2() },
-  };
-  */
+  const effectKuwahara = new ShaderPass(anisotropicKuwaharaShader);
+  renderer.getSize(effectKuwahara.uniforms.resolution.value);
+  composer.addPass(effectKuwahara);
 
   // ! Collect shader passes into object to make it more readable
   const shaderPasses = {
     structureTensor: effectStructureTensor,
     gaussHorizontal: effectGaussianBlurHorizontal,
     gaussVertical: effectGaussianBlurVertical,
-    anisotropicKuwahara: effectAnisotropicKuwahara,
+    kuwahara: effectKuwahara,
   };
 
   // ! First image scene load
@@ -139,21 +133,25 @@ function setupScene() {
     }
   });
 
+  // GUI
+  const gui = new GUI();
+  const kuwaharaFolder = gui.addFolder("Kuwahara");
+  addGUISetting(effectKuwahara, effectKuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
+
   // Clock to limit FPS
   const clock = new THREE.Clock();
   let delta = 0;
-  const interval = 1 / 4; // Denominator is FPS. Change as wanted.
+  const interval = 1 / 6; // Denominator is FPS. Change as wanted.
 
   // Start the animations
   const animate = () => {
-    // FPS counter
-    // stats.begin();
-
     requestAnimationFrame(animate);
     delta += clock.getDelta();
 
     if (delta > interval) {
-      stats.begin();
+      if (useFPSCounter) {
+        stats.begin();
+      }
       // Non-postprocessing version
       // renderer.render(scene, camera);
 
@@ -162,16 +160,10 @@ function setupScene() {
 
       delta %= interval;
 
-      stats.end();
+      if (useFPSCounter) {
+        stats.end();
+      }
     }
-    // Non-postprocessing version
-    // renderer.render(scene, camera);
-
-    // Postprocessing version
-    // composer.render();
-
-    // FPS counter
-    // stats.end();
   };
 
   animate();
@@ -208,7 +200,7 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       if (updateTex) {
         const mat = new THREE.MeshBasicMaterial({ map: texture });
         scene.children[0].material = mat;
-        shaderPasses.anisotropicKuwahara.uniforms.inputTex.value = texture;
+        shaderPasses.kuwahara.uniforms.inputTex.value = texture;
       }
 
       // Uniforms
@@ -262,6 +254,13 @@ function preventDefaults(event) {
 function updateUniforms(shaderPasses, resolutionVector) {
   Object.keys(shaderPasses).forEach((pass) => {
     shaderPasses[pass].uniforms.resolution.value = resolutionVector;
+  });
+}
+
+function addGUISetting(postEffect, uniform, guiFolder, min, max, step, name) {
+  const setting = guiFolder.add(uniform, "value", min, max, step).name(name);
+  setting.onChange(() => {
+    postEffect.uniformsNeedUpdate = true;
   });
 }
 
