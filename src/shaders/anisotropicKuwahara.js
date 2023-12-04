@@ -16,6 +16,9 @@ const anisotropicKuwaharaShader = {
     inputTex: { value: null },
     resolution: { value: new THREE.Vector2() },
     kernelRadius: { value: 3 },
+    zetaModifier: { value: 1.0 },
+    zeroCrossing: { value: 0.78 },
+    sharpness: { value: 8.0 },
   },
 
   vertexShader: /* glsl version 300 es */ `
@@ -24,6 +27,9 @@ const anisotropicKuwaharaShader = {
   uniform sampler2D inputTex;
   uniform vec2 resolution;
   uniform int kernelRadius;
+  uniform float zetaModifier;
+  uniform float zeroCrossing;
+  uniform float sharpness;
 
   // Outs
   out vec2 vUv;
@@ -39,6 +45,9 @@ const anisotropicKuwaharaShader = {
   uniform sampler2D inputTex;
   uniform vec2 resolution;
   uniform int kernelRadius;
+  uniform float zetaModifier;
+  uniform float zeroCrossing;
+  uniform float sharpness;
 
   // Ins
   in vec2 vUv;
@@ -60,7 +69,6 @@ const anisotropicKuwaharaShader = {
     float A = (lambda1 + lambda2 > 0.) ? (lambda1 - lambda2) / (lambda1 + lambda2) : 0.;
 
     float alpha = 1.;
-    // int kernelRadius = 3;
     float a = float(kernelRadius) * clamp((alpha + A) / alpha, float(kernelRadius) * 0.5, float(kernelRadius) * 2.);
     float b = float(kernelRadius) * clamp(alpha / (alpha + A), float(kernelRadius) * 0.5, float(kernelRadius));
 
@@ -68,16 +76,16 @@ const anisotropicKuwaharaShader = {
     float sinPhi = sin(phi);
 
     mat2 R = mat2(cosPhi, -sinPhi, sinPhi, cosPhi);
-    mat2 S = mat2(0.8 / a, 0., 0., 0.8 / b);
+    mat2 S = mat2(1. / a, 0., 0., 1. / b);
     mat2 SR = S * R;
 
+    // https://math.stackexchange.com/questions/91132/how-to-get-the-limits-of-rotated-ellipse
     int maxX = int(sqrt(a * a * cosPhi * cosPhi + b * b * sinPhi * sinPhi));
     int maxY = int(sqrt(a * a * sinPhi * sinPhi + b * b * cosPhi * cosPhi));
 
-    float zeta = 2. / float(kernelRadius);
-    float zeroCross = 0.78; // 0.4 - 0.78. Ace used 0.58
-    float sinZeroCross = sin(zeroCross);
-    float eta = (zeta + cos(zeroCross)) / (sinZeroCross * sinZeroCross);
+    float zeta = 2.0 / float(kernelRadius) * zetaModifier;
+    float sinZeroCrossing = sin(zeroCrossing);
+    float eta = (zeta + cos(zeroCrossing)) / (sinZeroCrossing * sinZeroCrossing);
 
     int k;
     vec4 m[8];
@@ -155,8 +163,8 @@ const anisotropicKuwaharaShader = {
       m[k].xyz /= m[k].w;
       s[k] = abs(s[k] / m[k].w - m[k].xyz * m[k].xyz);
 
-      float sigma2 = s[k].x + s[k].y + s[k].z;
-      float w = 1. / (1. + pow(1000. * sigma2 * 8., 0.8 * 8.));
+      float sigma = s[k].x + s[k].y + s[k].z;
+      float w = 1. / (1. + pow(1000. * sigma * 8.0, 0.5 * sharpness));
 
       gl_FragColor += vec4(m[k].rgb * w, w);
     }

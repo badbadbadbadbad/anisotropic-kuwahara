@@ -138,21 +138,14 @@ function setupScene() {
     }
   });
 
-  // TODO: Combine this into one setupGUI function which shaderPasses is passed to
   // ! GUI
-  const gui = new GUI();
-  const kuwaharaFolder = gui.addFolder("Kuwahara");
-  addGUISetting(effectKuwahara, effectKuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
+  setupGUI(shaderPasses);
 
-  const gammaFolder = gui.addFolder("Gamma correction");
-  addGUISetting(effectGamma, effectGamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
-
-  // Clock to limit FPS
+  // ! Start animation
   const clock = new THREE.Clock();
   let delta = 0;
-  const interval = 1 / 6; // Denominator is FPS. Change as wanted.
+  const interval = 1 / 6; // Denominator determines FPS. Change as wanted.
 
-  // Start the animations
   const animate = () => {
     requestAnimationFrame(animate);
     delta += clock.getDelta();
@@ -292,6 +285,35 @@ function addGUISetting(postEffect, uniform, guiFolder, min, max, step, name) {
   setting.onChange(() => {
     postEffect.uniformsNeedUpdate = true;
   });
+}
+
+function setupGUI(shaderPasses) {
+  const gui = new GUI();
+
+  const kuwaharaFolder = gui.addFolder("Kuwahara");
+  addGUISetting(shaderPasses.kuwahara, shaderPasses.kuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
+  addGUISetting(
+    shaderPasses.kuwahara,
+    shaderPasses.kuwahara.uniforms.zetaModifier,
+    kuwaharaFolder,
+    0.2,
+    5.0,
+    0.1,
+    "Blur inner strength"
+  );
+  addGUISetting(
+    shaderPasses.kuwahara,
+    shaderPasses.kuwahara.uniforms.zeroCrossing,
+    kuwaharaFolder,
+    0.4,
+    1.0,
+    0.01,
+    "Blur outer strength"
+  );
+  addGUISetting(shaderPasses.kuwahara, shaderPasses.kuwahara.uniforms.sharpness, kuwaharaFolder, 1.0, 20.0, 1.0, "Sharpness");
+
+  const gammaFolder = gui.addFolder("Gamma correction");
+  addGUISetting(shaderPasses.gamma, shaderPasses.gamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
 }
 
 export default setupScene;
