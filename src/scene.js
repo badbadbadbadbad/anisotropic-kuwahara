@@ -108,6 +108,7 @@ function setupScene() {
     gaussHorizontal: effectGaussianBlurHorizontal,
     gaussVertical: effectGaussianBlurVertical,
     kuwahara: effectKuwahara,
+    gamma: effectGamma,
   };
 
   // ! First image scene load
@@ -137,7 +138,8 @@ function setupScene() {
     }
   });
 
-  // GUI
+  // TODO: Combine this into one setupGUI function which shaderPasses is passed to
+  // ! GUI
   const gui = new GUI();
   const kuwaharaFolder = gui.addFolder("Kuwahara");
   addGUISetting(effectKuwahara, effectKuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
@@ -178,22 +180,12 @@ function setupScene() {
 
 // TODO: Combine parameters
 function reloadImageScene(container, renderer, composer, camera, scene, imageData, shaderPasses, updateTex = false) {
-  let height;
-  let width;
-  const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(
-    imageData.dataURL,
-    (texture) => {
-      // From linearSRGB to SRGB to fix image looking overexposed
-      texture.colorSpace = THREE.SRGBColorSpace;
-
-      // Save image aspect ratio for resize handler
-      imageData.texture = texture;
-      imageData.aspectRatio = texture.image.width / texture.image.height;
-
-      // Container ratio to ...
+  loadImageTexture(imageData, updateTex)
+    .then(() => {
       const canvasAspectRatio = container.clientWidth / container.clientHeight;
 
+      let height;
+      let width;
       if (imageData.aspectRatio >= canvasAspectRatio) {
         // Image reaches left/right of screen
         width = container.clientWidth;
@@ -205,9 +197,9 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       }
 
       if (updateTex) {
-        const mat = new THREE.MeshBasicMaterial({ map: texture });
+        const mat = new THREE.MeshBasicMaterial({ map: imageData.texture });
         scene.children[0].material = mat;
-        shaderPasses.kuwahara.uniforms.inputTex.value = texture;
+        shaderPasses.kuwahara.uniforms.inputTex.value = imageData.texture;
       }
 
       // Uniforms
@@ -226,10 +218,41 @@ function reloadImageScene(container, renderer, composer, camera, scene, imageDat
       camera.bottom = -height / 2;
 
       camera.updateProjectionMatrix();
-    },
-    undefined,
-    (error) => console.error("Error loading texture image", error)
-  );
+    })
+    .catch((error) => {
+      console.error("Texture loading failed:", error);
+    });
+}
+
+function loadImageTexture(imageData, updateTex) {
+  // Blank return if no new texture to load
+  if (!updateTex) {
+    return Promise.resolve();
+  }
+
+  imageData.texture.dispose();
+
+  const textureLoader = new THREE.TextureLoader();
+  return new Promise((resolve, reject) => {
+    textureLoader.load(
+      imageData.dataURL,
+      (texture) => {
+        // From linearSRGB to SRGB
+        texture.colorSpace = THREE.SRGBColorSpace;
+
+        // Save image aspect ratio for resize handler
+        imageData.texture = texture;
+        imageData.aspectRatio = texture.image.width / texture.image.height;
+
+        resolve();
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading texture image", error);
+        reject(error);
+      }
+    );
+  });
 }
 
 function isImage(file) {
