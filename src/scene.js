@@ -63,6 +63,7 @@ function setupScene() {
 
   // Renderer
   const renderer = new THREE.WebGLRenderer();
+  renderer.preserveDrawingBuffer = true;
   renderer.setSize(containerHTML.clientWidth, containerHTML.clientHeight);
   containerHTML.appendChild(renderer.domElement);
 
@@ -139,7 +140,7 @@ function setupScene() {
   });
 
   // ! GUI
-  setupGUI(shaderPasses);
+  setupGUI(shaderPasses, renderer, composer);
 
   // ! Start animation
   const clock = new THREE.Clock();
@@ -287,7 +288,7 @@ function addGUISetting(postEffect, uniform, guiFolder, min, max, step, name) {
   });
 }
 
-function setupGUI(shaderPasses) {
+function setupGUI(shaderPasses, renderer, composer) {
   const gui = new GUI();
 
   const kuwaharaFolder = gui.addFolder("Kuwahara");
@@ -314,6 +315,18 @@ function setupGUI(shaderPasses) {
 
   const gammaFolder = gui.addFolder("Gamma correction");
   addGUISetting(shaderPasses.gamma, shaderPasses.gamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
+
+  const downloadImage = () => {
+    composer.render();
+    const screenshotDataURL = renderer.domElement.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = screenshotDataURL;
+    link.download = "screenshot.png";
+    link.click();
+  };
+
+  gui.add({ downloadImage }, "downloadImage").name("Download Image");
 }
 
 export default setupScene;
