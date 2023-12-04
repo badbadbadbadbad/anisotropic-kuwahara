@@ -5,8 +5,8 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer";
 import { RenderPass } from "three/addons/postprocessing/RenderPass";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass";
 import structureTensorShader from "./shaders/structureTensor";
-import gaussianBlurHorizontalShader from "./shaders/gaussianBlurHorizontal";
-import gaussianBlurVerticalShader from "./shaders/gaussianBlurVertical";
+import gaussianBlurXShader from "./shaders/gaussianBlurX";
+import gaussianBlurYShader from "./shaders/gaussianBlurY";
 import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
 import gammaShader from "./shaders/gammaShader";
 
@@ -85,13 +85,13 @@ function setupScene() {
   renderer.getSize(effectStructureTensor.uniforms.resolution.value);
   composer.addPass(effectStructureTensor);
 
-  const effectGaussianBlurHorizontal = new ShaderPass(gaussianBlurHorizontalShader);
-  renderer.getSize(effectGaussianBlurHorizontal.uniforms.resolution.value);
-  composer.addPass(effectGaussianBlurHorizontal);
+  const effectGaussianBlurX = new ShaderPass(gaussianBlurXShader);
+  renderer.getSize(effectGaussianBlurX.uniforms.resolution.value);
+  composer.addPass(effectGaussianBlurX);
 
-  const effectGaussianBlurVertical = new ShaderPass(gaussianBlurVerticalShader);
-  renderer.getSize(effectGaussianBlurVertical.uniforms.resolution.value);
-  composer.addPass(effectGaussianBlurVertical);
+  const effectGaussianBlurY = new ShaderPass(gaussianBlurYShader);
+  renderer.getSize(effectGaussianBlurY.uniforms.resolution.value);
+  composer.addPass(effectGaussianBlurY);
 
   const effectKuwahara = new ShaderPass(anisotropicKuwaharaShader);
   renderer.getSize(effectKuwahara.uniforms.resolution.value);
@@ -103,8 +103,8 @@ function setupScene() {
   // ! Collect shader passes into object to make it more readable
   const shaderPasses = {
     structureTensor: effectStructureTensor,
-    gaussHorizontal: effectGaussianBlurHorizontal,
-    gaussVertical: effectGaussianBlurVertical,
+    gaussX: effectGaussianBlurX,
+    gaussY: effectGaussianBlurY,
     kuwahara: effectKuwahara,
     gamma: effectGamma,
   };
