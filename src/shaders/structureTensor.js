@@ -7,8 +7,8 @@
  * Visualization and Processing of Tensor Fields (2006), 17–47.
  *
  * Notes:
- *  - The source for this is the book "GPU Pro Advanced Rendering Techniques", which normalized the Sobel operator by 1/4.
- *    As such, this implementation uses the same normalizing factor.
+ * The source for this is the book "GPU Pro Advanced Rendering Techniques", which normalized the Sobel operator by 1/4.
+ * As such, this implementation uses the same normalizing factor.
  */
 
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved

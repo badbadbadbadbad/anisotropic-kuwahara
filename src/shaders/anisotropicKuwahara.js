@@ -1,9 +1,37 @@
 /**
  * Anisotropic Kuwahara filter.
  *
+ * The original Kuwahara filter left box-shaped and flicker artifacts and did not work well.
+ * Kuwahara M., Hachimura K., Eiho S., Kinoshita M.:
+ * Digital processing of biomedical images.
+ * Plenum Press, 1976, 187–203.
+ *
+ * One improved version is the Generalized Kuwahara filter,
+ * making use of a circular kernel and taking a weighted average.
+ * Papari G., Petkov N., Campisi P.:
+ * Artistic edge and corner enhancing smoothing.
+ * IEEE Transactions on Image Processing 16, 10 (2007), 2449–2462.
+ *
+ * A futher improvement is the Anisotropic Kuwahara filter,
+ * adapting the circular kernel into an ellipsis shape to take
+ * local anisotropy of the image into account.
+ * Kyprianidis J. E., Kang H., Döllner J.:
+ * Image and video abstraction by anisotropic kuwahara filtering.
+ * Computer Graphics Forum 28, 7 (2009), 1955–1963. Special issue on Pacific Graphics 2009.
+ *
+ * The version implemented here uses polynomial approximations as weighting functions
+ * instead of the original Anisotropic version's Gaussian functions
+ * to speed up the computation.
+ * Kyprianidis, J. E., Semmo, A., Kang, H., & Döllner, J.:
+ * Anisotropic Kuwahara Filtering with Polynomial Weighting Functions.
+ * EG UK Theory and Practice of Computer Graphics (2010), 25-30.
  *
  * Notes:
- *  -
+ * A sample implementation of this concept exists in the book
+ * "GPU Pro: Advanced Rendering Techniques", chapter V.1.
+ *
+ * A nice visualized introduction to this filter (and my inspiration):
+ * https://www.youtube.com/watch?v=LDhN-JK3U9g
  */
 
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved

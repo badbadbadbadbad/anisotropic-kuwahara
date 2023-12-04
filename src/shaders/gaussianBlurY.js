@@ -3,7 +3,7 @@
  * This is the second half of the blur.
  *
  * Notes:
- *  - The Gaussian function could be replaced by precomputed values to improve runtime.
+ * The Gaussian function could be replaced by precomputed values to improve runtime.
  */
 
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved
