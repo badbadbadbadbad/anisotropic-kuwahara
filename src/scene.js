@@ -285,33 +285,19 @@ function addGUISetting(postEffect, uniform, guiFolder, min, max, step, name) {
   });
 }
 
-function setupGUI(shaderPasses, renderer, composer) {
+function setupGUI(shaders, renderer, composer) {
   const gui = new GUI();
 
   const kuwaharaFolder = gui.addFolder("Kuwahara");
-  addGUISetting(shaderPasses.kuwahara, shaderPasses.kuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
-  addGUISetting(
-    shaderPasses.kuwahara,
-    shaderPasses.kuwahara.uniforms.zetaModifier,
-    kuwaharaFolder,
-    0.2,
-    5.0,
-    0.1,
-    "Blur inner strength"
-  );
-  addGUISetting(
-    shaderPasses.kuwahara,
-    shaderPasses.kuwahara.uniforms.zeroCrossing,
-    kuwaharaFolder,
-    0.4,
-    1.0,
-    0.01,
-    "Blur outer strength"
-  );
-  addGUISetting(shaderPasses.kuwahara, shaderPasses.kuwahara.uniforms.sharpness, kuwaharaFolder, 1.0, 20.0, 1.0, "Sharpness");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zetaModifier, kuwaharaFolder, 0.2, 5.0, 0.1, "Blur inner strength");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zeroCrossing, kuwaharaFolder, 0.4, 1.0, 0.01, "Blur outer strength");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.sharpness, kuwaharaFolder, 1.0, 20.0, 1.0, "Sharpness");
+  kuwaharaFolder.open();
 
   const gammaFolder = gui.addFolder("Gamma correction");
-  addGUISetting(shaderPasses.gamma, shaderPasses.gamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
+  addGUISetting(shaders.gamma, shaders.gamma.uniforms.gamma, gammaFolder, 0.3, 2.5, 0.1, "Gamma");
+  gammaFolder.open();
 
   const downloadImage = () => {
     composer.render();
