@@ -20,15 +20,12 @@ const hexColor = "#b1acc7";
 // Switch to true if Stats.js FPS counter should be used.
 const useFPSCounter = false;
 
+// Desired maximum FPS of image rendering.
+const maxFPS = 6;
+
 function setupScene() {
   // Get HTML container element for scene
   const containerHTML = document.getElementById("canvas-container");
-
-  /*
-  const HTMLelems = {
-    container: containerHTML,
-  };
-  */
 
   // Image stuff
   const imageData = {
@@ -145,7 +142,7 @@ function setupScene() {
   // ! Start animation
   const clock = new THREE.Clock();
   let delta = 0;
-  const interval = 1 / 6; // Denominator determines FPS. Change as wanted.
+  const interval = 1 / maxFPS; // Denominator determines FPS. Change as wanted.
 
   const animate = () => {
     requestAnimationFrame(animate);
