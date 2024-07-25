@@ -7,7 +7,6 @@ function createWebsite() {
   // Header
   const header = document.createElement("header");
   header.id = "header";
-  // header.innerText = "anisotropic kuwahara";
 
   // Logo
   const logoLink = document.createElement("a");
