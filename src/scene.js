@@ -1,3 +1,5 @@
+/* eslint no-restricted-syntax: 0 */ // Just let me use for .. of
+
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved
 import Stats from "three/examples/jsm/libs/stats.module";
 import { GUI } from "dat.gui";
@@ -29,71 +31,52 @@ function setupScene() {
   const leftContainerHTML = document.getElementById("left-canvas");
   const rightContainerHTML = document.getElementById("right-canvas");
 
-  // Image container
-  const imageData = {
-    dataURL: snowImage,
-    texture: new THREE.Texture(),
-    aspectRatio: 0,
+  const leftCanvas = {
+    container: leftContainerHTML,
+    renderer: null,
+    camera: null,
+    scene: null,
   };
 
-  // Scenes
-  const leftScene = new THREE.Scene();
-  leftScene.background = new THREE.Color(0x1c1c1f);
+  const rightCanvas = {
+    container: rightContainerHTML,
+    renderer: null,
+    camera: null,
+    scene: null,
+    composer: null,
+    shaders: null,
+  };
 
-  const rightScene = new THREE.Scene();
-  rightScene.background = new THREE.Color(0x1c1c1f);
+  // ! Setup for both canvases
+  for (const canvas of [leftCanvas, rightCanvas]) {
+    // Scene
+    canvas.scene = new THREE.Scene();
+    canvas.scene.background = new THREE.Color(0x1c1c1f);
 
-  // Canvas planes to project image on
-  const leftGeometry = new THREE.PlaneGeometry(1, 1);
-  const leftMaterial = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
-  leftScene.add(new THREE.Mesh(leftGeometry, leftMaterial));
+    // Canvas planes to project image on
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
+    canvas.scene.add(new THREE.Mesh(geometry, material));
 
-  const rightGeometry = new THREE.PlaneGeometry(1, 1);
-  const rightMaterial = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
-  rightScene.add(new THREE.Mesh(rightGeometry, rightMaterial));
+    // Camera
+    const width = canvas.container.clientWidth;
+    const height = canvas.container.clientHeight;
+    canvas.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+    canvas.camera.position.z = 5;
 
-  // Cameras
-  const leftCamera = new THREE.OrthographicCamera(
-    leftContainerHTML.clientWidth / -2,
-    leftContainerHTML.clientWidth / 2,
-    leftContainerHTML.clientHeight / 2,
-    leftContainerHTML.clientHeight / -2,
-    1,
-    1000
-  );
-  leftCamera.position.z = 5;
+    // Set camera position to look directly at the plane from above
+    canvas.camera.position.set(0, 0, 1);
+    canvas.camera.lookAt(canvas.scene.position);
 
-  const rightCamera = new THREE.OrthographicCamera(
-    rightContainerHTML.clientWidth / -2,
-    rightContainerHTML.clientWidth / 2,
-    rightContainerHTML.clientHeight / 2,
-    rightContainerHTML.clientHeight / -2,
-    1,
-    1000
-  );
-  rightCamera.position.z = 5;
+    // Renderer
+    canvas.renderer = new THREE.WebGLRenderer();
+    canvas.renderer.preserveDrawingBuffer = true;
+    canvas.renderer.setSize(canvas.container.clientWidth, canvas.container.clientHeight);
+    canvas.container.appendChild(canvas.renderer.domElement);
+    canvas.renderer.domElement.style.border = `2px solid ${hexColor}`;
+    canvas.renderer.domElement.style.borderRadius = "5px";
+  }
 
-  // Set camera positions to look directly at the plane from above
-  leftCamera.position.set(0, 0, 1);
-  leftCamera.lookAt(leftScene.position);
-
-  rightCamera.position.set(0, 0, 1);
-  rightCamera.lookAt(rightScene.position);
-
-  // Renderers
-  const leftRenderer = new THREE.WebGLRenderer();
-  leftRenderer.preserveDrawingBuffer = true;
-  leftRenderer.setSize(leftContainerHTML.clientWidth, leftContainerHTML.clientHeight);
-  leftContainerHTML.appendChild(leftRenderer.domElement);
-  leftRenderer.domElement.style.border = `2px solid ${hexColor}`;
-  leftRenderer.domElement.style.borderRadius = "5px";
-
-  const rightRenderer = new THREE.WebGLRenderer();
-  rightRenderer.preserveDrawingBuffer = true;
-  rightRenderer.setSize(rightContainerHTML.clientWidth, rightContainerHTML.clientHeight);
-  rightContainerHTML.appendChild(rightRenderer.domElement);
-  rightRenderer.domElement.style.border = `2px solid ${hexColor}`;
-  rightRenderer.domElement.style.borderRadius = "5px";
 
   // Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
@@ -104,32 +87,32 @@ function setupScene() {
   }
 
   // ! Postprocessing pipeline initialization
-  const rightComposer = new EffectComposer(rightRenderer);
+  rightCanvas.composer = new EffectComposer(rightCanvas.renderer);
 
-  const renderPass = new RenderPass(rightScene, rightCamera);
-  rightComposer.addPass(renderPass);
+  const renderPass = new RenderPass(rightCanvas.scene, rightCanvas.camera);
+  rightCanvas.composer.addPass(renderPass);
 
   const effectStructureTensor = new ShaderPass(structureTensorShader);
-  rightRenderer.getSize(effectStructureTensor.uniforms.resolution.value);
-  rightComposer.addPass(effectStructureTensor);
+  rightCanvas.renderer.getSize(effectStructureTensor.uniforms.resolution.value);
+  rightCanvas.composer.addPass(effectStructureTensor);
 
   const effectGaussianBlurX = new ShaderPass(gaussianBlurXShader);
-  rightRenderer.getSize(effectGaussianBlurX.uniforms.resolution.value);
-  rightComposer.addPass(effectGaussianBlurX);
+  rightCanvas.renderer.getSize(effectGaussianBlurX.uniforms.resolution.value);
+  rightCanvas.composer.addPass(effectGaussianBlurX);
 
   const effectGaussianBlurY = new ShaderPass(gaussianBlurYShader);
-  rightRenderer.getSize(effectGaussianBlurY.uniforms.resolution.value);
-  rightComposer.addPass(effectGaussianBlurY);
+  rightCanvas.renderer.getSize(effectGaussianBlurY.uniforms.resolution.value);
+  rightCanvas.composer.addPass(effectGaussianBlurY);
 
   const effectKuwahara = new ShaderPass(anisotropicKuwaharaShader);
-  rightRenderer.getSize(effectKuwahara.uniforms.resolution.value);
-  rightComposer.addPass(effectKuwahara);
+  rightCanvas.renderer.getSize(effectKuwahara.uniforms.resolution.value);
+  rightCanvas.composer.addPass(effectKuwahara);
 
   const effectGamma = new ShaderPass(gammaShader);
-  rightComposer.addPass(effectGamma);
+  rightCanvas.composer.addPass(effectGamma);
 
   // ! Collect shader passes into object to make it more readable
-  const shaderPasses = {
+  rightCanvas.shaders = {
     structureTensor: effectStructureTensor,
     gaussX: effectGaussianBlurX,
     gaussY: effectGaussianBlurY,
@@ -137,21 +120,12 @@ function setupScene() {
     gamma: effectGamma,
   };
 
-  // ! Collect canvases into objects too
-  const leftCanvas = {
-    container: leftContainerHTML,
-    renderer: leftRenderer,
-    camera: leftCamera,
-    scene: leftScene,
-  };
 
-  const rightCanvas = {
-    container: rightContainerHTML,
-    renderer: rightRenderer,
-    composer: rightComposer,
-    camera: rightCamera,
-    scene: rightScene,
-    shaders: shaderPasses,
+  // ! Image container
+  const imageData = {
+    dataURL: snowImage,
+    texture: new THREE.Texture(),
+    aspectRatio: 0,
   };
 
   // ! First image scene load
@@ -182,7 +156,7 @@ function setupScene() {
   });
 
   // ! GUI
-  setupGUI(shaderPasses, rightRenderer, rightComposer);
+  setupGUI(rightCanvas.shaders, rightCanvas.renderer, rightCanvas.composer);
 
   // ! Start animation
   const clock = new THREE.Clock();
@@ -199,8 +173,8 @@ function setupScene() {
       }
 
       // The actual render calls
-      leftRenderer.render(leftScene, leftCamera);
-      rightComposer.render();
+      leftCanvas.renderer.render(leftCanvas.scene, leftCanvas.camera);
+      rightCanvas.composer.render();
 
       delta %= interval;
 
