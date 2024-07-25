@@ -2,4 +2,4 @@
 
 Live version:
 
-https://badbadbadbadbad.github.io/anisotropic-kuwahara/index.html
+https://badbadbadbadbad.github.io/anisotropic-kuwahara
