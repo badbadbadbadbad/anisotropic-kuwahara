@@ -10,12 +10,10 @@ import gaussianBlurYShader from "./shaders/gaussianBlurY";
 import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
 import gammaShader from "./shaders/gammaShader";
 
-// Image source
-// https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
-import sampleImage from "../img/cat.png";
 
-// NEW IMAGE SOURCE
+// Image source
 // https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/
+import snowImage from "../img/snow.png";
 
 // Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
@@ -33,7 +31,7 @@ function setupScene() {
 
   // Image stuff
   const imageData = {
-    dataURL: sampleImage,
+    dataURL: snowImage,
     texture: new THREE.Texture(),
     aspectRatio: 0,
   };
