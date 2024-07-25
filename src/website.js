@@ -18,9 +18,6 @@ function createWebsite() {
   document.body.appendChild(header);
   document.body.appendChild(scenes);
 
-  // document.body.appendChild(leftScene);
-  // document.body.appendChild(threeScene);
-
   document.addEventListener("DOMContentLoaded", () => {
     setupScene();
   });

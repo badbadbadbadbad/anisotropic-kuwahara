@@ -10,7 +10,6 @@ import gaussianBlurYShader from "./shaders/gaussianBlurY";
 import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
 import gammaShader from "./shaders/gammaShader";
 
-
 // Image source
 // https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/
 import snowImage from "../img/snow.png";
@@ -22,14 +21,15 @@ const hexColor = "#b1acc7";
 const useFPSCounter = false;
 
 // Desired maximum FPS of image rendering.
+// Change as needed, but it's a static image so we really don't need much and can save computing power.
 const maxFPS = 4;
 
 function setupScene() {
-  // Get HTML container element for scene
+  // Get HTML container element for scenes
   const leftContainerHTML = document.getElementById("left-canvas");
   const rightContainerHTML = document.getElementById("right-canvas");
 
-  // Image stuff
+  // Image container
   const imageData = {
     dataURL: snowImage,
     texture: new THREE.Texture(),
@@ -43,7 +43,7 @@ function setupScene() {
   const rightScene = new THREE.Scene();
   rightScene.background = new THREE.Color(0x1c1c1f);
 
-  // Setup canvas planes
+  // Canvas planes to project image on
   const leftGeometry = new THREE.PlaneGeometry(1, 1);
   const leftMaterial = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
   leftScene.add(new THREE.Mesh(leftGeometry, leftMaterial));
@@ -187,7 +187,7 @@ function setupScene() {
   // ! Start animation
   const clock = new THREE.Clock();
   let delta = 0;
-  const interval = 1 / maxFPS; // Denominator determines FPS. Change as wanted.
+  const interval = 1 / maxFPS;
 
   const animate = () => {
     requestAnimationFrame(animate);
@@ -197,10 +197,8 @@ function setupScene() {
       if (useFPSCounter) {
         stats.begin();
       }
-      // Non-postprocessing version
-      // renderer.render(scene, camera);
 
-      // Postprocessing version
+      // The actual render calls
       leftRenderer.render(leftScene, leftCamera);
       rightComposer.render();
 
@@ -242,13 +240,14 @@ function reloadImageScene(left, right, imageData, updateTex = false) {
       // Uniforms
       updateUniforms(right.shaders, new THREE.Vector2(width, height));
 
+      // Scaling
       left.scene.children[0].scale.x = width;
       left.scene.children[0].scale.y = height;
 
       right.scene.children[0].scale.x = width;
       right.scene.children[0].scale.y = height;
 
-      // Set renderer and camera to plane size
+      // Set renderers and cameras to plane size
       left.renderer.setSize(width, height);
       left.camera.left = -width / 2;
       left.camera.right = width / 2;
@@ -344,8 +343,8 @@ function setupGUI(shaders, renderer, composer) {
 
   const kuwaharaFolder = gui.addFolder("Kuwahara");
   addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.kernelRadius, kuwaharaFolder, 2, 5, 1, "Blur radius");
-  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zetaModifier, kuwaharaFolder, 0.2, 5.0, 0.1, "Blur inner strength");
-  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zeroCrossing, kuwaharaFolder, 0.4, 1.0, 0.01, "Blur outer strength");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zetaModifier, kuwaharaFolder, 0.2, 5.0, 0.1, "Inner blur");
+  addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.zeroCrossing, kuwaharaFolder, 0.4, 1.0, 0.01, "Outer blur");
   addGUISetting(shaders.kuwahara, shaders.kuwahara.uniforms.sharpness, kuwaharaFolder, 1.0, 20.0, 1.0, "Sharpness");
   kuwaharaFolder.open();
 
