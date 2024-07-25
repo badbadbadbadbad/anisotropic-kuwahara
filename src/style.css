@@ -10,9 +10,9 @@
 /* Source */
 /* https://fonts.google.com/specimen/Open+Sans */
 @font-face {
-  font-family: "OpenSans";
-  src: url("../fonts/OpenSans-VariableFont_wdth\,wght.ttf") format("ttf"),
-    url("../fonts/OpenSans-Italic-VariableFont_wdth\,wght.ttf") format("ttf");
+  font-family: "Open Sans";
+  src: url("../fonts/OpenSans-VariableFont_wdth\,wght.ttf") format("truetype"),
+    url("../fonts/OpenSans-Italic-VariableFont_wdth\,wght.ttf") format("truetype"); /* Turns out Firefox rejects .ttf and needs truetype format. */
   font-weight: 400;
   font-style: normal;
 }
@@ -28,6 +28,24 @@ body {
   padding: 0;
   font-family: "Open Sans", "sans-serif";
   background-color: var(--grey-shade1);
+  display: flex;
+  flex-direction: column;
+}
+
+#header {
+  height: 5%;
+  background-color: var(--grey-shade2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: solid 2px;
+  border-color: var(--grey-shade5);
+  font-family: "Open Sans", "sans-serif";
+  font-size: 35px;
+}
+
+#scenes {
+  height: 95%;
   display: flex;
 }
 

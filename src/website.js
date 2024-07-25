@@ -2,11 +2,24 @@ import setupScene from "./scene";
 import "./style.css";
 
 function createWebsite() {
-  const controlPanel = setupImageScene();
+  const header = document.createElement("header");
+  header.id = "header";
+  header.innerText = "anisotropic kuwahara";
+
+  const scenes = document.createElement("div");
+  scenes.id = "scenes";
+
+  const leftScene = setupImageScene();
   const threeScene = setupKuwaharaScene();
 
-  document.body.appendChild(controlPanel);
-  document.body.appendChild(threeScene);
+  scenes.appendChild(leftScene);
+  scenes.appendChild(threeScene);
+
+  document.body.appendChild(header);
+  document.body.appendChild(scenes);
+
+  // document.body.appendChild(leftScene);
+  // document.body.appendChild(threeScene);
 
   document.addEventListener("DOMContentLoaded", () => {
     setupScene();
