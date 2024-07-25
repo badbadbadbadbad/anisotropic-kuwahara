@@ -43,6 +43,21 @@ body {
   font-family: "Open Sans", "sans-serif";
   font-size: 35px;
   color: var(--grey-shade6);
+  position: relative;
+}
+
+#logo-link {
+  display: flex;
+  align-items: center;
+  height: 90%;
+  position: absolute;
+  left: 10px;
+  opacity: 0.6;
+}
+
+#logo-img {
+  height: 80%;
+  width: auto;
 }
 
 #scenes {

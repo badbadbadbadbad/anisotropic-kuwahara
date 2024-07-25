@@ -1,11 +1,33 @@
 import setupScene from "./scene";
 import "./style.css";
 
+import githubIcon from "./icon/github-mark-white.svg";
+
 function createWebsite() {
+  // Header
   const header = document.createElement("header");
   header.id = "header";
-  header.innerText = "anisotropic kuwahara";
+  // header.innerText = "anisotropic kuwahara";
 
+  // Logo
+  const logoLink = document.createElement("a");
+  logoLink.id = "logo-link";
+  header.appendChild(logoLink);
+  logoLink.href = "https://github.com/badbadbadbadbad/anisotropic-kuwahara";
+  logoLink.target = "_blank"; // Open in a new tab
+
+  const logoImg = document.createElement("img");
+  logoImg.id = "logo-img";
+  logoLink.appendChild(logoImg);
+  logoImg.src = githubIcon;
+  logoImg.alt = "GitHub";
+
+  // Header text
+  const headerText = document.createElement("div");
+  headerText.innerHTML = "anisotropic kuwahara";
+  header.appendChild(headerText);
+
+  // Scenes
   const scenes = document.createElement("div");
   scenes.id = "scenes";
 
