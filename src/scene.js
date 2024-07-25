@@ -14,7 +14,7 @@ import gammaShader from "./shaders/gammaShader";
 
 // Image source
 // https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/
-import snowImage from "../img/snow.png";
+import snowImage from "./img/snow.png";
 
 // Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
@@ -77,7 +77,6 @@ function setupScene() {
     canvas.renderer.domElement.style.borderRadius = "5px";
   }
 
-
   // Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
   if (useFPSCounter) {
@@ -119,7 +118,6 @@ function setupScene() {
     kuwahara: effectKuwahara,
     gamma: effectGamma,
   };
-
 
   // ! Image container
   const imageData = {
