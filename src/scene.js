@@ -14,6 +14,9 @@ import gammaShader from "./shaders/gammaShader";
 // https://unsplash.com/photos/russian-blue-cat-wearing-yellow-sunglasses-yMSecCHsIBc
 import sampleImage from "../img/cat.png";
 
+// NEW IMAGE SOURCE
+// https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/
+
 // Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
 
@@ -21,11 +24,12 @@ const hexColor = "#b1acc7";
 const useFPSCounter = false;
 
 // Desired maximum FPS of image rendering.
-const maxFPS = 6;
+const maxFPS = 4;
 
 function setupScene() {
   // Get HTML container element for scene
-  const containerHTML = document.getElementById("canvas-container");
+  const leftContainerHTML = document.getElementById("left-canvas");
+  const rightContainerHTML = document.getElementById("right-canvas");
 
   // Image stuff
   const imageData = {
@@ -34,71 +38,97 @@ function setupScene() {
     aspectRatio: 0,
   };
 
-  // Scene
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1c1c1f);
+  // Scenes
+  const leftScene = new THREE.Scene();
+  leftScene.background = new THREE.Color(0x1c1c1f);
 
-  // Setup canvas plane
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
-  scene.add(new THREE.Mesh(geometry, material));
+  const rightScene = new THREE.Scene();
+  rightScene.background = new THREE.Color(0x1c1c1f);
 
-  // Camera
-  const camera = new THREE.OrthographicCamera(
-    containerHTML.clientWidth / -2,
-    containerHTML.clientWidth / 2,
-    containerHTML.clientHeight / 2,
-    containerHTML.clientHeight / -2,
+  // Setup canvas planes
+  const leftGeometry = new THREE.PlaneGeometry(1, 1);
+  const leftMaterial = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
+  leftScene.add(new THREE.Mesh(leftGeometry, leftMaterial));
+
+  const rightGeometry = new THREE.PlaneGeometry(1, 1);
+  const rightMaterial = new THREE.MeshBasicMaterial({ color: 0x1c1c1f });
+  rightScene.add(new THREE.Mesh(rightGeometry, rightMaterial));
+
+  // Cameras
+  const leftCamera = new THREE.OrthographicCamera(
+    leftContainerHTML.clientWidth / -2,
+    leftContainerHTML.clientWidth / 2,
+    leftContainerHTML.clientHeight / 2,
+    leftContainerHTML.clientHeight / -2,
     1,
     1000
   );
-  camera.position.z = 5;
+  leftCamera.position.z = 5;
 
-  // Set camera position to look directly at the plane from above
-  camera.position.set(0, 0, 1);
-  camera.lookAt(scene.position);
+  const rightCamera = new THREE.OrthographicCamera(
+    rightContainerHTML.clientWidth / -2,
+    rightContainerHTML.clientWidth / 2,
+    rightContainerHTML.clientHeight / 2,
+    rightContainerHTML.clientHeight / -2,
+    1,
+    1000
+  );
+  rightCamera.position.z = 5;
 
-  // Renderer
-  const renderer = new THREE.WebGLRenderer();
-  renderer.preserveDrawingBuffer = true;
-  renderer.setSize(containerHTML.clientWidth, containerHTML.clientHeight);
-  containerHTML.appendChild(renderer.domElement);
+  // Set camera positions to look directly at the plane from above
+  leftCamera.position.set(0, 0, 1);
+  leftCamera.lookAt(leftScene.position);
 
-  renderer.domElement.style.border = `2px solid ${hexColor}`;
-  renderer.domElement.style.borderRadius = "5px";
+  rightCamera.position.set(0, 0, 1);
+  rightCamera.lookAt(rightScene.position);
+
+  // Renderers
+  const leftRenderer = new THREE.WebGLRenderer();
+  leftRenderer.preserveDrawingBuffer = true;
+  leftRenderer.setSize(leftContainerHTML.clientWidth, leftContainerHTML.clientHeight);
+  leftContainerHTML.appendChild(leftRenderer.domElement);
+  leftRenderer.domElement.style.border = `2px solid ${hexColor}`;
+  leftRenderer.domElement.style.borderRadius = "5px";
+
+  const rightRenderer = new THREE.WebGLRenderer();
+  rightRenderer.preserveDrawingBuffer = true;
+  rightRenderer.setSize(rightContainerHTML.clientWidth, rightContainerHTML.clientHeight);
+  rightContainerHTML.appendChild(rightRenderer.domElement);
+  rightRenderer.domElement.style.border = `2px solid ${hexColor}`;
+  rightRenderer.domElement.style.borderRadius = "5px";
 
   // Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
   if (useFPSCounter) {
     stats.showPanel(0);
     stats.domElement.style.position = "absolute";
-    containerHTML.appendChild(stats.domElement);
+    rightContainerHTML.appendChild(stats.domElement);
   }
 
   // ! Postprocessing pipeline initialization
-  const composer = new EffectComposer(renderer);
+  const rightComposer = new EffectComposer(rightRenderer);
 
-  const renderPass = new RenderPass(scene, camera);
-  composer.addPass(renderPass);
+  const renderPass = new RenderPass(rightScene, rightCamera);
+  rightComposer.addPass(renderPass);
 
   const effectStructureTensor = new ShaderPass(structureTensorShader);
-  renderer.getSize(effectStructureTensor.uniforms.resolution.value);
-  composer.addPass(effectStructureTensor);
+  rightRenderer.getSize(effectStructureTensor.uniforms.resolution.value);
+  rightComposer.addPass(effectStructureTensor);
 
   const effectGaussianBlurX = new ShaderPass(gaussianBlurXShader);
-  renderer.getSize(effectGaussianBlurX.uniforms.resolution.value);
-  composer.addPass(effectGaussianBlurX);
+  rightRenderer.getSize(effectGaussianBlurX.uniforms.resolution.value);
+  rightComposer.addPass(effectGaussianBlurX);
 
   const effectGaussianBlurY = new ShaderPass(gaussianBlurYShader);
-  renderer.getSize(effectGaussianBlurY.uniforms.resolution.value);
-  composer.addPass(effectGaussianBlurY);
+  rightRenderer.getSize(effectGaussianBlurY.uniforms.resolution.value);
+  rightComposer.addPass(effectGaussianBlurY);
 
   const effectKuwahara = new ShaderPass(anisotropicKuwaharaShader);
-  renderer.getSize(effectKuwahara.uniforms.resolution.value);
-  composer.addPass(effectKuwahara);
+  rightRenderer.getSize(effectKuwahara.uniforms.resolution.value);
+  rightComposer.addPass(effectKuwahara);
 
   const effectGamma = new ShaderPass(gammaShader);
-  composer.addPass(effectGamma);
+  rightComposer.addPass(effectGamma);
 
   // ! Collect shader passes into object to make it more readable
   const shaderPasses = {
@@ -109,12 +139,29 @@ function setupScene() {
     gamma: effectGamma,
   };
 
+  // ! Collect canvases into objects too
+  const leftCanvas = {
+    container: leftContainerHTML,
+    renderer: leftRenderer,
+    camera: leftCamera,
+    scene: leftScene,
+  };
+
+  const rightCanvas = {
+    container: rightContainerHTML,
+    renderer: rightRenderer,
+    composer: rightComposer,
+    camera: rightCamera,
+    scene: rightScene,
+    shaders: shaderPasses,
+  };
+
   // ! First image scene load
-  reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
+  reloadImageScene(leftCanvas, rightCanvas, imageData, true);
 
   // ! Handle container resize
   window.addEventListener("resize", () => {
-    reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses);
+    reloadImageScene(leftCanvas, rightCanvas, imageData);
   });
 
   // ! Drag and drop
@@ -129,7 +176,7 @@ function setupScene() {
     if (isImage(file)) {
       try {
         imageData.dataURL = await readImage(file);
-        reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
+        reloadImageScene(leftCanvas, rightCanvas, imageData, true);
       } catch (error) {
         console.error("Error reading dropped image:", error);
       }
@@ -137,7 +184,7 @@ function setupScene() {
   });
 
   // ! GUI
-  setupGUI(shaderPasses, renderer, composer);
+  setupGUI(shaderPasses, rightRenderer, rightComposer);
 
   // ! Start animation
   const clock = new THREE.Clock();
@@ -156,7 +203,8 @@ function setupScene() {
       // renderer.render(scene, camera);
 
       // Postprocessing version
-      composer.render();
+      leftRenderer.render(leftScene, leftCamera);
+      rightComposer.render();
 
       delta %= interval;
 
@@ -169,46 +217,54 @@ function setupScene() {
   animate();
 }
 
-// TODO: Combine parameters
-function reloadImageScene(container, renderer, composer, camera, scene, imageData, shaderPasses, updateTex = false) {
+function reloadImageScene(left, right, imageData, updateTex = false) {
   loadImageTexture(imageData, updateTex)
     .then(() => {
-      const canvasAspectRatio = container.clientWidth / container.clientHeight;
+      const canvasAspectRatio = right.container.clientWidth / right.container.clientHeight;
 
       let height;
       let width;
       if (imageData.aspectRatio >= canvasAspectRatio) {
         // Image reaches left/right of screen
-        width = container.clientWidth;
+        width = right.container.clientWidth;
         height = width / imageData.aspectRatio;
       } else {
         // Image reaches top/bottom of screen
-        height = container.clientHeight;
+        height = right.container.clientHeight;
         width = height * imageData.aspectRatio;
       }
 
       if (updateTex) {
         const mat = new THREE.MeshBasicMaterial({ map: imageData.texture });
-        scene.children[0].material = mat;
-        shaderPasses.kuwahara.uniforms.inputTex.value = imageData.texture;
+        left.scene.children[0].material = mat;
+        right.scene.children[0].material = mat;
+        right.shaders.kuwahara.uniforms.inputTex.value = imageData.texture;
       }
 
       // Uniforms
-      updateUniforms(shaderPasses, new THREE.Vector2(width, height));
+      updateUniforms(right.shaders, new THREE.Vector2(width, height));
 
-      scene.children[0].scale.x = width;
-      scene.children[0].scale.y = height;
+      left.scene.children[0].scale.x = width;
+      left.scene.children[0].scale.y = height;
+
+      right.scene.children[0].scale.x = width;
+      right.scene.children[0].scale.y = height;
 
       // Set renderer and camera to plane size
-      renderer.setSize(width, height);
-      composer.setSize(width, height);
+      left.renderer.setSize(width, height);
+      left.camera.left = -width / 2;
+      left.camera.right = width / 2;
+      left.camera.top = height / 2;
+      left.camera.bottom = -height / 2;
+      left.camera.updateProjectionMatrix();
 
-      camera.left = -width / 2;
-      camera.right = width / 2;
-      camera.top = height / 2;
-      camera.bottom = -height / 2;
-
-      camera.updateProjectionMatrix();
+      right.renderer.setSize(width, height);
+      right.composer.setSize(width, height);
+      right.camera.left = -width / 2;
+      right.camera.right = width / 2;
+      right.camera.top = height / 2;
+      right.camera.bottom = -height / 2;
+      right.camera.updateProjectionMatrix();
     })
     .catch((error) => {
       console.error("Texture loading failed:", error);
@@ -311,7 +367,7 @@ function setupGUI(shaders, renderer, composer) {
 
   gui.add({ downloadImage }, "downloadImage").name("Download Image");
 
-  gui.close()
+  gui.close();
 }
 
 export default setupScene;

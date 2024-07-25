@@ -27,26 +27,27 @@ function createWebsite() {
 }
 
 function setupImageScene() {
-  const container = document.createElement("div");
-  container.classList.add("half");
+  const leftContainer = document.createElement("div");
+  leftContainer.classList.add("half");
+  leftContainer.id = "left-half";
 
-  const controlPanel = document.createElement("div");
-  controlPanel.id = "control-panel";
-  container.appendChild(controlPanel);
+  const canvas = document.createElement("div");
+  canvas.id = "left-canvas";
+  leftContainer.appendChild(canvas);
 
-  return container;
+  return leftContainer;
 }
 
 function setupKuwaharaScene() {
-  const outerContainer = document.createElement("div");
-  outerContainer.classList.add("half");
-  outerContainer.id = "right-half";
+  const rightContainer = document.createElement("div");
+  rightContainer.classList.add("half");
+  rightContainer.id = "right-half";
 
-  const container = document.createElement("div");
-  container.id = "canvas-container";
-  outerContainer.appendChild(container);
+  const canvas = document.createElement("div");
+  canvas.id = "right-canvas";
+  rightContainer.appendChild(canvas);
 
-  return outerContainer;
+  return rightContainer;
 }
 
 export default createWebsite;
