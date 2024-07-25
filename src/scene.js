@@ -310,6 +310,8 @@ function setupGUI(shaders, renderer, composer) {
   };
 
   gui.add({ downloadImage }, "downloadImage").name("Download Image");
+
+  gui.close()
 }
 
 export default setupScene;
