@@ -1,6 +1,6 @@
 :root {
   --grey-shade1: #1c1c1f;
-  --grey-shade2: #403e4b;
+  --grey-shade2: #424149;
   --grey-shade3: #625e79;
   --grey-shade4: #8781a4;
   --grey-shade5: #b1acc7;
@@ -39,9 +39,10 @@ body {
   align-items: center;
   justify-content: center;
   border-bottom: solid 2px;
-  border-color: var(--grey-shade5);
+  border-color: var(--grey-shade4);
   font-family: "Open Sans", "sans-serif";
   font-size: 35px;
+  color: var(--grey-shade6);
 }
 
 #scenes {
