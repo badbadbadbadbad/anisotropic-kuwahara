@@ -2,8 +2,8 @@ import setupScene from "./scene";
 import "./style.css";
 
 function createWebsite() {
-  const controlPanel = setupControlPanel();
-  const threeScene = setupThreeScene();
+  const controlPanel = setupImageScene();
+  const threeScene = setupKuwaharaScene();
 
   document.body.appendChild(controlPanel);
   document.body.appendChild(threeScene);
@@ -13,7 +13,7 @@ function createWebsite() {
   });
 }
 
-function setupControlPanel() {
+function setupImageScene() {
   const container = document.createElement("div");
   container.classList.add("half");
 
@@ -24,7 +24,7 @@ function setupControlPanel() {
   return container;
 }
 
-function setupThreeScene() {
+function setupKuwaharaScene() {
   const outerContainer = document.createElement("div");
   outerContainer.classList.add("half");
   outerContainer.id = "right-half";

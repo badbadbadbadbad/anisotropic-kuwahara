@@ -114,7 +114,7 @@ function setupScene() {
 
   // ! Handle container resize
   window.addEventListener("resize", () => {
-    reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses, true);
+    reloadImageScene(containerHTML, renderer, composer, camera, scene, imageData, shaderPasses);
   });
 
   // ! Drag and drop
