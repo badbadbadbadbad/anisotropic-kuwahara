@@ -17,3 +17,5 @@ Upload an image by dropping it into the website, adjust the filter parameters us
 - [Video on Kuwahara filtering](https://www.youtube.com/watch?v=LDhN-JK3U9g): A YouTube video by Acerola where I first heard of the filter and got the inspiration to develop an in-browser version.
 
 - [Image source](https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/)
+
+- [Upload icon source](https://feathericons.com/?query=upload)
