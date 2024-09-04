@@ -189,7 +189,14 @@ function setupScene() {
     }
   });
 
-  // ! Upload icon
+  // ! Icon opacity on left scene hover
+  leftCanvas.renderer.domElement.addEventListener("mouseenter", () => {
+    uploadIconHTML.style.opacity = 0.4;
+  });
+
+  leftCanvas.renderer.domElement.addEventListener("mouseleave", () => {
+    uploadIconHTML.style.opacity = 0;
+  });
 
   // ! GUI
   setupGUI(rightCanvas.shaders, rightCanvas.renderer, rightCanvas.composer);
