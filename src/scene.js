@@ -191,7 +191,7 @@ function setupScene() {
 
   // ! Icon opacity on left scene hover
   leftCanvas.renderer.domElement.addEventListener("mouseenter", () => {
-    uploadIconHTML.style.opacity = 0.9;
+    uploadIconHTML.style.opacity = 0.7;
   });
 
   leftCanvas.renderer.domElement.addEventListener("mouseleave", () => {
