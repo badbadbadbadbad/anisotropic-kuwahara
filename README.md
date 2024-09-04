@@ -1,6 +1,6 @@
 # Anisotropic Kuwahara Filtering
 
-A simple website running the anisotropic Kuwahara filter on user-provided images, implemented as a THREE.js shader effect and written in GLSL. [Live version running on GitHub Pages](https://badbadbadbadbad.github.io/anisotropic-kuwahara)
+A simple website running the anisotropic Kuwahara filter on user-provided images, implemented as a THREE.js shader effect written in GLSL. [Live version running on GitHub Pages](https://badbadbadbadbad.github.io/anisotropic-kuwahara)
 
 # Usage
 
