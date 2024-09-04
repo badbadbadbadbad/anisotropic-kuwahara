@@ -59,12 +59,7 @@ function setupImageScene() {
   fileInput.accept = "image/*";
   fileInput.style.display = "none";
 
-  // const uploadIconElement = document.createElement("img");
-  // uploadIconElement.src = uploadIcon;
-  // uploadIconElement.id = "upload-icon";
-
   canvas.appendChild(fileInput);
-  // canvas.appendChild(uploadIconElement);
   leftContainer.appendChild(canvas);
 
   return leftContainer;

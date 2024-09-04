@@ -80,11 +80,7 @@ function setupScene() {
     canvas.renderer.domElement.style.borderRadius = "5px";
   }
 
-  // ! Test
-  // leftContainerHTML.style.position = "relative";
-  // leftCanvas.renderer.domElement.style.position = "relative";
-
-  // Optional FPS counter from Stats.js (Three.js plugin version)
+  // ! Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
   if (useFPSCounter) {
     stats.showPanel(0);
@@ -278,11 +274,9 @@ function reloadImageScene(left, right, imageData, icon, updateTex = false) {
       right.camera.updateProjectionMatrix();
 
       // Change icon container size
-      const iconContainerHTML = document.getElementById("icon-container");
+      const iconContainerHTML = icon.iconContainer;
       iconContainerHTML.style.width = `${width}px`;
       iconContainerHTML.style.height = `${height}px`;
-      // iconContainerHTML.style.top = `${leftCanvas.renderer.domElement.offsetTop}px`;
-      // iconContainerHTML.style.left = `${leftCanvas.renderer.domElement.offsetLeft}px`;
     })
     .catch((error) => {
       console.error("Texture loading failed:", error);
