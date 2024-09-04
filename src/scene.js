@@ -80,6 +80,10 @@ function setupScene() {
     canvas.renderer.domElement.style.borderRadius = "5px";
   }
 
+  // ! Test
+  // leftContainerHTML.style.position = "relative";
+  // leftCanvas.renderer.domElement.style.position = "relative";
+
   // Optional FPS counter from Stats.js (Three.js plugin version)
   const stats = new Stats();
   if (useFPSCounter) {
@@ -129,12 +133,26 @@ function setupScene() {
     aspectRatio: 0,
   };
 
+  // ! Upload icon
+  const uploadIconHTML = document.createElement("img");
+  uploadIconHTML.src = uploadIcon;
+  uploadIconHTML.id = "upload-icon";
+
+  const iconContainerHTML = document.createElement("div");
+  iconContainerHTML.id = "icon-container";
+  iconContainerHTML.appendChild(uploadIconHTML);
+  leftContainerHTML.appendChild(iconContainerHTML);
+
+  const icon = {
+    iconContainer: iconContainerHTML,
+  };
+
   // ! First image scene load
-  reloadImageScene(leftCanvas, rightCanvas, imageData, true);
+  reloadImageScene(leftCanvas, rightCanvas, imageData, icon, true);
 
   // ! Handle container resize
   window.addEventListener("resize", () => {
-    reloadImageScene(leftCanvas, rightCanvas, imageData);
+    reloadImageScene(leftCanvas, rightCanvas, imageData, icon);
   });
 
   // ! Drag and drop image upload
@@ -149,7 +167,7 @@ function setupScene() {
     if (isImage(file)) {
       try {
         imageData.dataURL = await readImage(file);
-        reloadImageScene(leftCanvas, rightCanvas, imageData, true);
+        reloadImageScene(leftCanvas, rightCanvas, imageData, icon, true);
       } catch (error) {
         console.error("Error reading dropped image:", error);
       }
@@ -168,12 +186,14 @@ function setupScene() {
     if (isImage(file)) {
       try {
         imageData.dataURL = await readImage(file);
-        reloadImageScene(leftCanvas, rightCanvas, imageData, true);
+        reloadImageScene(leftCanvas, rightCanvas, imageData, icon, true);
       } catch (error) {
         console.error("Error reading uploaded image:", error);
       }
     }
   });
+
+  // ! Upload icon
 
   // ! GUI
   setupGUI(rightCanvas.shaders, rightCanvas.renderer, rightCanvas.composer);
@@ -207,7 +227,7 @@ function setupScene() {
   animate();
 }
 
-function reloadImageScene(left, right, imageData, updateTex = false) {
+function reloadImageScene(left, right, imageData, icon, updateTex = false) {
   loadImageTexture(imageData, updateTex)
     .then(() => {
       const canvasAspectRatio = right.container.clientWidth / right.container.clientHeight;
@@ -256,6 +276,13 @@ function reloadImageScene(left, right, imageData, updateTex = false) {
       right.camera.top = height / 2;
       right.camera.bottom = -height / 2;
       right.camera.updateProjectionMatrix();
+
+      // Change icon container size
+      const iconContainerHTML = document.getElementById("icon-container");
+      iconContainerHTML.style.width = `${width}px`;
+      iconContainerHTML.style.height = `${height}px`;
+      // iconContainerHTML.style.top = `${leftCanvas.renderer.domElement.offsetTop}px`;
+      // iconContainerHTML.style.left = `${leftCanvas.renderer.domElement.offsetLeft}px`;
     })
     .catch((error) => {
       console.error("Texture loading failed:", error);
