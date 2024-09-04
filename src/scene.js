@@ -12,6 +12,8 @@ import gaussianBlurYShader from "./shaders/gaussianBlurY";
 import anisotropicKuwaharaShader from "./shaders/anisotropicKuwahara";
 import gammaShader from "./shaders/gammaShader";
 
+import uploadIcon from "./icon/upload.svg";
+
 // Image source
 // https://www.elitetreecare.com/2018/12/the-risk-of-snow-on-trees/
 import snowImage from "./img/snow.png";
@@ -30,6 +32,7 @@ function setupScene() {
   // Get HTML container element for scenes
   const leftContainerHTML = document.getElementById("left-canvas");
   const rightContainerHTML = document.getElementById("right-canvas");
+  const fileInputHTML = document.getElementById("file-input");
 
   const leftCanvas = {
     container: leftContainerHTML,
@@ -134,7 +137,7 @@ function setupScene() {
     reloadImageScene(leftCanvas, rightCanvas, imageData);
   });
 
-  // ! Drag and drop
+  // ! Drag and drop image upload
   ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
     document.body.addEventListener(eventName, preventDefaults, false);
   });
@@ -149,6 +152,25 @@ function setupScene() {
         reloadImageScene(leftCanvas, rightCanvas, imageData, true);
       } catch (error) {
         console.error("Error reading dropped image:", error);
+      }
+    }
+  });
+
+  // ! Click image upload
+  leftCanvas.renderer.domElement.addEventListener("click", () => {
+    fileInputHTML.click();
+  });
+
+  fileInputHTML.addEventListener("change", async (event) => {
+    // Get first file only in case of multi-upload
+    const file = event.target.files[0];
+
+    if (isImage(file)) {
+      try {
+        imageData.dataURL = await readImage(file);
+        reloadImageScene(leftCanvas, rightCanvas, imageData, true);
+      } catch (error) {
+        console.error("Error reading uploaded image:", error);
       }
     }
   });

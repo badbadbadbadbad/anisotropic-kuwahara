@@ -51,6 +51,14 @@ function setupImageScene() {
 
   const canvas = document.createElement("div");
   canvas.id = "left-canvas";
+
+  const fileInput = document.createElement("input");
+  fileInput.id = "file-input";
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+  fileInput.style.display = "none";
+
+  canvas.appendChild(fileInput);
   leftContainer.appendChild(canvas);
 
   return leftContainer;
