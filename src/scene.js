@@ -284,6 +284,10 @@ function reloadImageScene(left, right, imageData, icon, updateTex = false) {
       const iconContainerHTML = icon.iconContainer;
       iconContainerHTML.style.width = `${width}px`;
       iconContainerHTML.style.height = `${height}px`;
+
+      // Immediately render again to avoid resize flicker
+      left.renderer.render(left.scene, left.camera);
+      right.composer.render();
     })
     .catch((error) => {
       console.error("Texture loading failed:", error);
