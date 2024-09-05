@@ -4,7 +4,7 @@ A simple website running the anisotropic Kuwahara filter on user-provided images
 
 # Usage
 
-Upload an image by dropping it into the website, adjust the filter parameters using the GUI in the top right, and download the filtered image for your personal use.
+Upload an image by dropping it into the website. Alternatively, access an upload menu by clicking (or tapping) the left/top scene. Then, adjust the filter parameters to your liking using the GUI in the top right, and download the filtered image for your personal use.
 
 # References
 
