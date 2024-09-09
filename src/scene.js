@@ -1,7 +1,6 @@
 /* eslint no-restricted-syntax: 0 */ // Just let me use for .. of
 
 import * as THREE from "three"; // eslint-disable-line import/no-unresolved
-import Stats from "three/examples/jsm/libs/stats.module";
 import { GUI } from "dat.gui";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer";
 import { RenderPass } from "three/addons/postprocessing/RenderPass";
@@ -20,13 +19,6 @@ import snowImage from "./img/snow.png";
 
 // Border colour for renderer canvas. Same as other borders in website.
 const hexColor = "#b1acc7";
-
-// Switch to true if Stats.js FPS counter should be used.
-const useFPSCounter = false;
-
-// Desired maximum FPS of image rendering.
-// Change as needed, but it's a static image so we really don't need much and can save computing power.
-const maxFPS = 4;
 
 function setupScene() {
   // Get HTML container element for scenes
@@ -78,14 +70,6 @@ function setupScene() {
     canvas.container.appendChild(canvas.renderer.domElement);
     canvas.renderer.domElement.style.border = `2px solid ${hexColor}`;
     canvas.renderer.domElement.style.borderRadius = "5px";
-  }
-
-  // ! Optional FPS counter from Stats.js (Three.js plugin version)
-  const stats = new Stats();
-  if (useFPSCounter) {
-    stats.showPanel(0);
-    stats.domElement.style.position = "absolute";
-    rightContainerHTML.appendChild(stats.domElement);
   }
 
   // ! Postprocessing pipeline initialization
@@ -201,33 +185,9 @@ function setupScene() {
   // ! GUI
   setupGUI(rightCanvas.shaders, rightCanvas.renderer, rightCanvas.composer);
 
-  // ! Start animation
-  const clock = new THREE.Clock();
-  let delta = 0;
-  const interval = 1 / maxFPS;
-
-  const animate = () => {
-    requestAnimationFrame(animate);
-    delta += clock.getDelta();
-
-    if (delta > interval) {
-      if (useFPSCounter) {
-        stats.begin();
-      }
-
-      // The actual render calls
-      leftCanvas.renderer.render(leftCanvas.scene, leftCanvas.camera);
-      rightCanvas.composer.render();
-
-      delta %= interval;
-
-      if (useFPSCounter) {
-        stats.end();
-      }
-    }
-  };
-
-  animate();
+  // ! No animation required for static images, only render once
+  leftCanvas.renderer.render(leftCanvas.scene, leftCanvas.camera);
+  rightCanvas.composer.render();
 }
 
 function reloadImageScene(left, right, imageData, icon, updateTex = false) {
@@ -285,7 +245,7 @@ function reloadImageScene(left, right, imageData, icon, updateTex = false) {
       iconContainerHTML.style.width = `${width}px`;
       iconContainerHTML.style.height = `${height}px`;
 
-      // Immediately render again to avoid resize flicker
+      // ! Immediately render again on resize to avoid any flickering
       left.renderer.render(left.scene, left.camera);
       right.composer.render();
     })
