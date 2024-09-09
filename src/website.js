@@ -2,7 +2,6 @@ import setupScene from "./scene";
 import "./style.css";
 
 import githubIcon from "./icon/github-mark-white.svg";
-// import uploadIcon from "./icon/upload.svg";
 
 function createWebsite() {
   // Header

@@ -58,6 +58,12 @@ body {
 #logo-img {
   height: 80%;
   width: auto;
+  opacity: 0.4;
+  transition: opacity 0.5s ease;
+}
+
+#logo-img:hover {
+  opacity: 1;
 }
 
 #scenes {
