@@ -23,6 +23,7 @@ function createWebsite() {
 
   // Header text
   const headerText = document.createElement("div");
+  headerText.id = "header-text";
   headerText.innerHTML = "anisotropic kuwahara";
   header.appendChild(headerText);
 
@@ -41,6 +42,7 @@ function createWebsite() {
 
   document.addEventListener("DOMContentLoaded", () => {
     setupScene();
+    document.body.classList.add("loaded");
   });
 }
 
